@@ -1,0 +1,56 @@
+name: notes-api
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: notes-api:local
+    env_file: [.env]
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PRESENTATION_PROTOCOL: ${PRESENTATION_PROTOCOL:-both}
+      DATABASE_ENGINE: ${DATABASE_ENGINE:-sqlite}
+      DATABASE_URL: ${DATABASE_URL:-./data/notes.db}
+      PORT_HTTP: 3000
+      PORT_GRAPHQL: 4000
+    ports:
+      - '${PORT_HTTP:-3000}:3000'
+      - '${PORT_GRAPHQL:-4000}:4000'
+    volumes:
+      - sqlite-data:/app/data
+    restart: unless-stopped
+
+  # (postgres y mongo igual que antes)
+  postgres:
+    image: postgres:16-alpine
+    profiles: ['postgres']
+    environment:
+      POSTGRES_USER: notes
+      POSTGRES_PASSWORD: notes
+      POSTGRES_DB: notes
+    ports: ['5432:5432']
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U notes']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    profiles: ['mongo']
+    ports: ['27017:27017']
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  sqlite-data:
+  pg-data:
+  mongo-data:

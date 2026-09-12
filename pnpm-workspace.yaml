@@ -1,0 +1,11 @@
+allowBuilds:
+  bcrypt: true
+  esbuild: true
+  unrs-resolver: true
+# Configuraciones de comportamiento para pnpm v11
+strictPeerDependencies: false
+autoInstallPeers: true
+preferFrozenLockfile: true
+nodeLinker: isolated
+verifyStoreIntegrity: true
+sideEffectsCache: true

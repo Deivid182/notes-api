@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+echo "▶ typecheck"
+pnpm run typecheck || exit 1
+
+echo "▶ lint"
+pnpm run lint || exit 1
+
+echo "▶ unit tests"
+pnpm run test:unit || exit 1
+
+echo "✓ pre-push OK"

@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# .husky/prepare-commit-msg
+
+# Solo aplica a commits nuevos (no amend, merge, squash)
+[ -z "$2" ] || exit 0
+
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+TICKET=$(echo "$BRANCH" | sed -nE 's#^.*/([A-Z]+-[0-9]+).*$#\1#p')
+[ -z "$TICKET" ] && exit 0
+
+MSG_FILE="$1"
+MSG=$(cat "$MSG_FILE")
+# Si ya empieza por [TICKET] no lo duplicamos
+echo "$MSG" | grep -q "^\[$TICKET\]" && exit 0
+echo "[$TICKET] $MSG" > "$MSG_FILE"
