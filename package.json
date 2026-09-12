@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "imports": {
+    "#modules/auth/*": "./dist/modules/auth/*.js",
+    "#modules/users/*": "./dist/modules/users/*.js",
+    "#modules/notes/*": "./dist/modules/notes/*.js",
+    "#modules/shared/*": "./dist/modules/shared/*.js",
+    "#modules/*": "./dist/modules/*.js"
+  },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
