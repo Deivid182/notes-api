@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Base común
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 # Instala pnpm 12 a nivel global.
 RUN npm install -g pnpm@12
@@ -13,7 +13,7 @@ WORKDIR /app
 # Dependencias de producción (para copiar al runtime)
 # ---------------------------------------------------------------------------
 FROM base AS prod-deps
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm config set store-dir /pnpm/store && \
     pnpm install --frozen-lockfile --prod --ignore-scripts=false
@@ -22,7 +22,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # Build (con dev deps para compilar TS)
 # ---------------------------------------------------------------------------
 FROM base AS build
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm config set store-dir /pnpm/store && \
     pnpm install --frozen-lockfile

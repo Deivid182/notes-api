@@ -1,15 +1,15 @@
-// import { authResolvers } from '../../modules/auth/presentation/graphql/auth.resolvers.js';
-// import { authTypeDefs } from '../../modules/auth/presentation/graphql/auth.typeDefs.js';
 // import { notesResolvers } from '../../modules/notes/presentation/graphql/notes.resolvers.js';
 // import { notesTypeDefs } from '../../modules/notes/presentation/graphql/notes.typeDefs.js';
-// import { usersResolvers } from '../../modules/users/presentation/graphql/users.resolvers.js';
 import { createSchema } from 'graphql-yoga';
 
+import { authResolvers } from '#modules/auth/presentation/graphql/auth.resolvers';
+import { authTypeDefs } from '#modules/auth/presentation/graphql/auth.typedefs';
 import { usersResolvers } from '#modules/users/presentation/graphql/users.resolvers';
 import { usersTypeDefs } from '#modules/users/presentation/graphql/users.typedefs';
 
 export const typeDefs = /* GraphQL */ `
   ${usersTypeDefs}
+  ${authTypeDefs}
 `;
 
 export const resolvers = {
@@ -18,7 +18,7 @@ export const resolvers = {
     // ...notesResolvers.Query,
   },
   Mutation: {
-    // ...authResolvers.Mutation,
+    ...authResolvers.Mutation,
     // ...notesResolvers.Mutation,
     ...usersResolvers.Mutation,
   },

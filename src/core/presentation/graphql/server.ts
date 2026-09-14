@@ -20,6 +20,7 @@ export function createGraphQLServer(container: Container, port: number): GraphQL
     schema: schema,
     context: ({ request }) => buildContext({ container }, request),
     graphqlEndpoint: '/graphql',
+    graphiql: container.env.NODE_ENV !== 'production',
     landingPage: container.env.NODE_ENV !== 'production',
   });
 

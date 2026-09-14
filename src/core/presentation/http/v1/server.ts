@@ -1,5 +1,6 @@
 import express, { type Express } from 'express';
 
+import { createAuthRouter } from '#modules/auth/presentation/http/v1/auth.router';
 import { type Container } from '#modules/shared/infrastructure/config/container';
 import { createUsersRouter } from '#modules/users/presentation/http/v1/users.router';
 
@@ -7,9 +8,7 @@ import { createErrorHandler } from './middlewares/error.middleware.js';
 import { createNotFoundHandler } from './middlewares/not-found.middleware.js';
 
 // import type { Container } from '../../config/container.js';
-// import { createAuthRouter } from '../../modules/auth/presentation/http/auth.router.js';
 // import { createNotesRouter } from '../../modules/notes/presentation/http/notes.router.js';
-// import { createUsersRouter } from '../../modules/users/presentation/http/users.router.js';
 // import { createErrorHandler, createNotFoundHandler } from './middlewares/error-handler.js';
 
 export function createHttpServer(container: Container): Express {
@@ -35,7 +34,7 @@ export function createHttpServer(container: Container): Express {
 
   // --- Routers por módulo ---
   app.use('/api/v1/users', createUsersRouter(container));
-  // app.use('/api/auth', createAuthRouter(container));
+  app.use('/api/v1/auth', createAuthRouter(container));
   // app.use('/api/notes', createNotesRouter(container));
 
   // --- Errores ---

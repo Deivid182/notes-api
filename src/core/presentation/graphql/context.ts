@@ -18,6 +18,16 @@ export async function buildContext(
   { container }: BuildContextDeps,
   request: Request,
 ): Promise<GraphQLContext> {
-  void request;
-  return { container, user: null };
+  const header = request.headers.get('authorization');
+  if (!header || !header.startsWith('Bearer ')) {
+    return { container, user: null };
+  }
+
+  const token = header.slice('Bearer '.length).trim();
+  try {
+    const payload = await container.tokenService.verifyAccessToken(token);
+    return { container, user: { id: payload.sub, role: payload.role } };
+  } catch {
+    return { container, user: null };
+  }
 }
