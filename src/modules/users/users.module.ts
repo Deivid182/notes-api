@@ -1,14 +1,14 @@
 import { type PasswordHasher } from '#modules/shared/domain/interfaces/password-hasher.interface';
-import { BcryptPasswordHasher } from '#modules/shared/infraestructure/adapters/bcrypt-password-hasher.adapter';
-import { type SharedContext } from '#modules/shared/infraestructure/config/shared-context';
+import { BcryptPasswordHasher } from '#modules/shared/infrastructure/adapters/bcrypt-password-hasher.adapter';
+import { type SharedContext } from '#modules/shared/infrastructure/config/shared-context';
 
 import { AssignRoleUseCase } from './application/assing-role.use-case.js';
 import { CreateUserUseCase } from './application/create-user.use-case.js';
 import { GetUserUseCase } from './application/get-user.use-case.js';
 import { type UserRepository } from './domain/user.repository.js';
-import { MongoUserRepositoryImpl } from './infraestructure/mongodb/mongodb-user.repository.impl.js';
-import { PostgresUserRepository } from './infraestructure/postgres/postgres.repository.impl.js';
-import { SqliteUserRepositoryImpl } from './infraestructure/sqlite/sqlite-user.repository.impl.js';
+import { MongoUserRepositoryImpl } from './infrastructure/mongodb/mongodb-user.repository.impl.js';
+import { PostgresUserRepository } from './infrastructure/postgres/postgres.repository.impl.js';
+import { SqliteUserRepositoryImpl } from './infrastructure/sqlite/sqlite-user.repository.impl.js';
 
 export interface UsersModule {
   /** Puerto expuesto a otros módulos (nunca la implementación concreta). */

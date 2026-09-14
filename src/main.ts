@@ -1,13 +1,18 @@
 // import { type MongoClient, type Db } from 'mongodb';
 
-import { ConsoleLogger } from '#modules/shared/infraestructure/adapters/console-logger.adapter';
+import { type DatabaseSync } from 'node:sqlite';
 
+import { ConsoleLogger } from '#modules/shared/infrastructure/adapters/console-logger.adapter';
+
+import { connectSqlite } from './core/infrastructure/persistence/sqlite/connection.js';
+import { runSqliteMigrations } from './core/infrastructure/persistence/sqlite/migrate.js';
+import { createHttpServer } from './core/presentation/http/v1/index.js';
 import {
   buildContainer,
   buildSharedContext,
   type Persistence,
-} from './modules/shared/infraestructure/config/container.js';
-import { loadEnv, type Env } from './modules/shared/infraestructure/config/env.js';
+} from './modules/shared/infrastructure/config/container.js';
+import { loadEnv, type Env } from './modules/shared/infrastructure/config/env.js';
 
 // import { ConsoleLogger } from './modules/shared/infrastructure/adapters/console-logger.adapter.js';
 
@@ -18,11 +23,8 @@ import { loadEnv, type Env } from './modules/shared/infraestructure/config/env.j
 // import { runMongoMigrations } from './infrastructure/persistence/mongodb/migrate.js';
 // import { connectPostgres } from './infrastructure/persistence/postgres/connection.js';
 // import { runPostgresMigrations } from './infrastructure/persistence/postgres/migrate.js';
-// import { connectSqlite } from './infrastructure/persistence/sqlite/connection.js';
-// import { runSqliteMigrations } from './infrastructure/persistence/sqlite/migrate.js';
 
 // import { createGraphQLServer } from './presentation/graphql/server.js';
-// import { createHttpServer } from './presentation/http/server.js';
 
 interface BootstrapResult {
   persistence: Persistence;
@@ -32,20 +34,20 @@ interface BootstrapResult {
 async function bootstrapPersistence(env: Env, logger: ConsoleLogger): Promise<BootstrapResult> {
   switch (env.DATABASE_ENGINE) {
     case 'sqlite': {
-      // const db: DatabaseSync = connectSqlite(env.DATABASE_URL);
-      // if (env.RUN_MIGRATIONS) runSqliteMigrations(db, logger);
-      // return {
-      //   persistence: { sqlite: db },
-      //   shutdown: async () => {
-      //     db.close();
-      //   },
-      // };
+      const db: DatabaseSync = connectSqlite(env.DATABASE_URL);
+      if (env.RUN_MIGRATIONS) runSqliteMigrations(db, logger);
       return {
-        persistence: { sqlite: undefined },
+        persistence: { sqlite: db },
         shutdown: async () => {
-          logger.info('SQLite persistence shutdown (no-op)');
+          db.close();
         },
       };
+      // return {
+      //   persistence: { sqlite: undefined },
+      //   shutdown: async () => {
+      //     logger.info('SQLite persistence shutdown (no-op)');
+      //   },
+      // };
     }
 
     case 'postgres': {
@@ -111,17 +113,17 @@ async function main(): Promise<void> {
   const stops: Array<() => Promise<void>> = [shutdownPersistence];
 
   if (env.PRESENTATION_PROTOCOL === 'http' || env.PRESENTATION_PROTOCOL === 'both') {
-    logger.info(`HTTP listening on :${env.PORT_HTTP}`);
-    // const app = createHttpServer(container);
-    // const server = app.listen(env.PORT_HTTP, () => {
-    //   logger.info(`HTTP listening on :${env.PORT_HTTP}`);
-    // });
-    // stops.push(
-    //   () =>
-    //     new Promise<void>((resolve, reject) =>
-    //       server.close((err) => (err ? reject(err) : resolve())),
-    //     ),
-    // );
+    // logger.info(`HTTP listening on :${env.PORT_HTTP}`);
+    const app = createHttpServer(container);
+    const server = app.listen(env.PORT_HTTP, () => {
+      logger.info(`HTTP listening on :${env.PORT_HTTP}`);
+    });
+    stops.push(
+      () =>
+        new Promise<void>((resolve, reject) =>
+          server.close((err) => (err ? reject(err) : resolve())),
+        ),
+    );
   }
 
   if (env.PRESENTATION_PROTOCOL === 'graphql' || env.PRESENTATION_PROTOCOL === 'both') {

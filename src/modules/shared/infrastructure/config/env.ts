@@ -13,6 +13,8 @@ const schema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   DEFAULT_USER_ROLE: z.string().default('user'),
+
+  RUN_MIGRATIONS: z.coerce.boolean().default(false),
 });
 
 export type Env = z.infer<typeof schema>;
