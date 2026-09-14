@@ -2,6 +2,7 @@
 
 import { type DatabaseSync } from 'node:sqlite';
 
+import { createGraphQLServer } from '#core/presentation/graphql/server';
 import { ConsoleLogger } from '#modules/shared/infrastructure/adapters/console-logger.adapter';
 
 import { connectSqlite } from './core/infrastructure/persistence/sqlite/connection.js';
@@ -23,8 +24,6 @@ import { loadEnv, type Env } from './modules/shared/infrastructure/config/env.js
 // import { runMongoMigrations } from './infrastructure/persistence/mongodb/migrate.js';
 // import { connectPostgres } from './infrastructure/persistence/postgres/connection.js';
 // import { runPostgresMigrations } from './infrastructure/persistence/postgres/migrate.js';
-
-// import { createGraphQLServer } from './presentation/graphql/server.js';
 
 interface BootstrapResult {
   persistence: Persistence;
@@ -127,11 +126,11 @@ async function main(): Promise<void> {
   }
 
   if (env.PRESENTATION_PROTOCOL === 'graphql' || env.PRESENTATION_PROTOCOL === 'both') {
-    logger.info(`GraphQL listening on :${env.PORT_GRAPHQL}`);
-    // const gql = createGraphQLServer(container, env.PORT_GRAPHQL);
-    // await gql.start();
-    // logger.info(`GraphQL listening on :${env.PORT_GRAPHQL}${gql.yoga.graphqlEndpoint}`);
-    // stops.push(() => gql.stop());
+    // logger.info(`GraphQL listening on :${env.PORT_GRAPHQL}`);
+    const gql = createGraphQLServer(container, env.PORT_GRAPHQL);
+    await gql.start();
+    logger.info(`GraphQL listening on :${env.PORT_GRAPHQL}${gql.yoga.graphqlEndpoint}`);
+    stops.push(() => gql.stop());
   }
 
   // 4) Graceful shutdown.

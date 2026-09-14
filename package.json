@@ -8,7 +8,8 @@
     "#modules/users/*": "./dist/modules/users/*.js",
     "#modules/notes/*": "./dist/modules/notes/*.js",
     "#modules/shared/*": "./dist/modules/shared/*.js",
-    "#modules/*": "./dist/modules/*.js"
+    "#modules/*": "./dist/modules/*.js",
+    "#core/*": "./dist/core/*.js"
   },
   "scripts": {
     "lint": "eslint .",

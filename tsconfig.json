@@ -21,7 +21,8 @@
       "#modules/users/*": ["./src/modules/users/*"],
       "#modules/notes/*": ["./src/modules/notes/*"],
       "#modules/shared/*": ["./src/modules/shared/*"],
-      "#modules/*": ["./src/modules/*"]
+      "#modules/*": ["./src/modules/*"],
+      "#core/*": ["./src/core/*"]
     }
   },
   "include": ["src/**/*"],
