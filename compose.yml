@@ -4,8 +4,9 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: notes-api:local
+      dockerfile: dockerfile
+      target: development
+    image: notes-api:development
     env_file: [.env]
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -18,7 +19,20 @@ services:
       - '${PORT_HTTP:-3000}:3000'
       - '${PORT_GRAPHQL:-4000}:4000'
     volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./docker:/app/docker
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - ./vitest.config.ts:/app/vitest.config.ts
+      - ./vitest.setup.ts:/app/vitest.setup.ts
+
       - sqlite-data:/app/data
+
+      - /app/node_modules
+    init: true
+    stdin_open: true
+    tty: true
     restart: unless-stopped
 
   # (postgres y mongo igual que antes)
@@ -54,3 +68,4 @@ volumes:
   sqlite-data:
   pg-data:
   mongo-data:
+  node-modules:

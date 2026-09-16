@@ -1,5 +1,5 @@
 // import { type MongoClient, type Db } from 'mongodb';
-
+import 'dotenv/config';
 import { type DatabaseSync } from 'node:sqlite';
 
 import { createGraphQLServer } from '#core/presentation/graphql/server';
@@ -92,6 +92,12 @@ async function bootstrapPersistence(env: Env, logger: ConsoleLogger): Promise<Bo
 async function main(): Promise<void> {
   const env = loadEnv();
   const logger = new ConsoleLogger();
+
+  logger.info('Starting application', {
+    env: env.NODE_ENV,
+    protocol: env.PRESENTATION_PROTOCOL,
+    engine: env.DATABASE_ENGINE,
+  });
 
   logger.info('Bootstrapping', {
     env: env.NODE_ENV,

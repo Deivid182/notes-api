@@ -9,9 +9,9 @@ const schema = z.object({
   DATABASE_URL: z.string().default('./data/notes.db'),
   DATABASE_NAME: z.string().default('notes_api'),
   JWT_ACCESS_SECRET: z.string().min(1),
-  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('900'),
   JWT_REFRESH_SECRET: z.string().min(1),
-  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('604800'),
   DEFAULT_USER_ROLE: z.string().default('user'),
 
   RUN_MIGRATIONS: z.coerce.boolean().default(false),
