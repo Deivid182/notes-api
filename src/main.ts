@@ -2,18 +2,18 @@
 import 'dotenv/config';
 import { type DatabaseSync } from 'node:sqlite';
 
-import { createGraphQLServer } from '#core/presentation/graphql/server';
 import { ConsoleLogger } from '#modules/shared/infrastructure/adapters/console-logger.adapter';
+import { createGraphQLServer } from '#modules/shared/presentation/graphql/server';
 
-import { connectSqlite } from './core/infrastructure/persistence/sqlite/connection.js';
-import { runSqliteMigrations } from './core/infrastructure/persistence/sqlite/migrate.js';
-import { createHttpServer } from './core/presentation/http/v1/index.js';
 import {
   buildContainer,
   buildSharedContext,
   type Persistence,
 } from './modules/shared/infrastructure/config/container.js';
 import { loadEnv, type Env } from './modules/shared/infrastructure/config/env.js';
+import { connectSqlite } from './modules/shared/infrastructure/persistence/sqlite/connection.js';
+import { runSqliteMigrations } from './modules/shared/infrastructure/persistence/sqlite/migrate.js';
+import { createHttpServer } from './modules/shared/presentation/http/v1/index.js';
 
 // import { ConsoleLogger } from './modules/shared/infrastructure/adapters/console-logger.adapter.js';
 

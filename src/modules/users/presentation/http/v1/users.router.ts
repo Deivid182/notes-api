@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validateRequest } from '../../../../../core/presentation/http/v1/middlewares/validate-request.middleware.js';
+import { validateRequest } from '../../../../shared/presentation/http/v1/middlewares/validate-request.middleware.js';
 
 import { assignRoleSchema, createUserSchema } from './schemas/users.schemas.js';
 import { UsersController } from './users.controller.js';

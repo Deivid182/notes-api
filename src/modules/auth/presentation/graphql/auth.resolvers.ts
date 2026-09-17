@@ -1,5 +1,5 @@
-import { type GraphQLContext } from '#core/presentation/graphql/context';
-import { toGraphQLError, requireUser } from '#core/presentation/graphql/helpers';
+import { type GraphQLContext } from '#modules/shared/presentation/graphql/context';
+import { toGraphQLError, requireUser } from '#modules/shared/presentation/graphql/helpers';
 import { toUserDTO } from '#modules/users/presentation/http/v1/dtos/users.dto';
 
 export const authResolvers = {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { validateRequest } from '#core/presentation/http/v1/middlewares/validate-request.middleware';
 import { type Container } from '#modules/shared/infrastructure/config/container';
+import { validateRequest } from '#modules/shared/presentation/http/v1/middlewares/validate-request.middleware';
 
 import { AuthController } from './auth.controller.js';
 import { loginSchema, logoutSchema, refreshSchema, registerSchema } from './auth.schemas.js';

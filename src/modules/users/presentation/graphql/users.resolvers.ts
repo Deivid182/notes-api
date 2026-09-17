@@ -1,8 +1,8 @@
-import { toGraphQLError } from '#core/presentation/graphql/helpers';
+import { toGraphQLError } from '#modules/shared/presentation/graphql/helpers';
 
 import { toUserDTO } from '../http/v1/dtos/users.dto.js';
 
-import type { GraphQLContext } from '#core/presentation/graphql/context.js';
+import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
 export const usersResolvers = {
   Query: {

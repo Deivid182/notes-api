@@ -52,8 +52,7 @@ export function runSqliteMigrations(db: DatabaseSync, logger: Logger): void {
 // Ejecutable directo: `tsx src/infrastructure/persistence/sqlite/migrate.ts`
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { connectSqlite } = await import('./connection.js');
-  const { ConsoleLogger } =
-    await import('../../../../modules/shared/infrastructure/adapters/console-logger.adapter.js');
+  const { ConsoleLogger } = await import('../../adapters/console-logger.adapter.js');
   const url = process.env.DATABASE_URL ?? './data/notes.db';
   const db = connectSqlite(url);
   runSqliteMigrations(db, new ConsoleLogger());
