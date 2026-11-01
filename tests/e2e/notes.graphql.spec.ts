@@ -22,7 +22,7 @@ describe('notes GraphQL e2e', () => {
   });
 
   it('requires authentication', async () => {
-    const r = await gql(t.yoga, '{ notes { id } }');
+    const r = await gql(t.yoga, '{ notes { hasMore } }');
     expect(r.errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
   });
 
@@ -79,5 +79,27 @@ describe('notes GraphQL e2e', () => {
       'mutation { register(email: "pw@test.com", password: "short") { accessToken } }',
     );
     expect(r.errors?.[0]?.extensions.code).toBe('BAD_USER_INPUT');
+  });
+
+  it('paginates notes', async () => {
+    const reg = await gql(
+      t.yoga,
+      'mutation { register(email: "gpager@test.com", password: "secret123") { accessToken } }',
+    );
+    const token = (reg.data.register as { accessToken: string }).accessToken;
+    for (let i = 0; i < 3; i++) {
+      await gql(t.yoga, `mutation { createNote(title: "g${i}") { id } }`, token);
+    }
+    const page = await gql(
+      t.yoga,
+      '{ notes(limit: 2) { items { title } limit offset hasMore } }',
+      token,
+    );
+    const notes = page.data.notes as { items: unknown[]; hasMore: boolean; limit: number };
+    expect(notes.items).toHaveLength(2);
+    expect(notes).toMatchObject({ limit: 2, hasMore: true });
+
+    const bad = await gql(t.yoga, '{ notes(limit: 500) { hasMore } }', token);
+    expect(bad.errors?.[0]?.extensions.code).toBe('BAD_USER_INPUT');
   });
 });

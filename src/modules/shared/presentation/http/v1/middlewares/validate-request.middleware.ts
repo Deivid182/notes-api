@@ -5,13 +5,18 @@ import type z from 'zod';
 
 export const validateRequest =
   (schema: z.ZodType, source: 'body' | 'query' | 'params' = 'body'): RequestHandler =>
-  (req, res, next) => {
+  (req, _res, next) => {
     const result = schema.safeParse(req[source]);
     if (!result.success) {
       const msg = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
       return next(new ValidationError(msg));
     }
-    // assign parsed
-    req[source] = result.data;
+    // En Express 5 `req.query` es un getter de solo lectura: se redefine en la instancia.
+    Object.defineProperty(req, source, {
+      value: result.data,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
     next();
   };

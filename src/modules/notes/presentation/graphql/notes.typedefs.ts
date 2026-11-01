@@ -8,8 +8,15 @@ export const notesTypeDefs = /* GraphQL */ `
     updatedAt: String!
   }
 
+  type NotePage {
+    items: [Note!]!
+    limit: Int!
+    offset: Int!
+    hasMore: Boolean!
+  }
+
   type Query {
-    notes: [Note!]!
+    notes(limit: Int, offset: Int): NotePage!
     note(id: ID!): Note!
   }
 

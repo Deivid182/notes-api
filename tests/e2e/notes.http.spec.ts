@@ -98,4 +98,31 @@ describe('notes HTTP e2e', () => {
     expect(adminList.body.data.some((n: { id: string }) => n.id === id)).toBe(true);
     expect((await request(t.app).get(`/api/v1/notes/${id}`).set(auth(admin))).status).toBe(200);
   });
+
+  it('paginates the listing and validates limit/offset', async () => {
+    const token = await register('pager@test.com');
+    for (let i = 0; i < 5; i++) {
+      await request(t.app)
+        .post('/api/v1/notes')
+        .set(auth(token))
+        .send({ title: `p${i}` });
+    }
+
+    const first = await request(t.app).get('/api/v1/notes?limit=2').set(auth(token));
+    expect(first.status).toBe(200);
+    expect(first.body.data).toHaveLength(2);
+    expect(first.body.meta).toEqual({ limit: 2, offset: 0, hasMore: true });
+
+    const last = await request(t.app).get('/api/v1/notes?limit=2&offset=4').set(auth(token));
+    expect(last.body.data).toHaveLength(1);
+    expect(last.body.meta.hasMore).toBe(false);
+
+    const all = await request(t.app).get('/api/v1/notes').set(auth(token));
+    expect(all.body.meta).toEqual({ limit: 50, offset: 0, hasMore: false });
+
+    for (const bad of ['limit=0', 'limit=101', 'limit=abc', 'offset=-1', 'limit=1.5']) {
+      const res = await request(t.app).get(`/api/v1/notes?${bad}`).set(auth(token));
+      expect(res.status, bad).toBe(400);
+    }
+  });
 });

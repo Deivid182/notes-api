@@ -19,10 +19,10 @@ const env = parseEnv({
 describe('createApp', () => {
   it('builds the container and runs migrations without opening ports', async () => {
     const app = await createApp(env, { logger: silent });
-    const notes = await app.container.modules.notes.useCases.listNotes.execute({
+    const page = await app.container.modules.notes.useCases.listNotes.execute({
       actor: { id: 'nobody', role: 'user' },
     });
-    expect(notes).toEqual([]);
+    expect(page.items).toEqual([]);
     await app.stop();
   });
 

@@ -28,4 +28,34 @@ describe('SqliteNoteRepositoryImpl rehydration', () => {
     expect(note?.content.toString()).toHaveLength(20_000);
     db.close();
   });
+
+  it('returns a stable, newest-first window per owner', async () => {
+    const db = connectSqlite(':memory:');
+    runSqliteMigrations(db, silent);
+    const stamp = (i: number) => new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString();
+    for (const u of ['u1', 'u2']) {
+      db.prepare(
+        `INSERT INTO users (id, email, password_hash, role, created_at, updated_at)
+         VALUES (?, ?, 'h', 'user', ?, ?)`,
+      ).run(u, `${u}@test.com`, stamp(0), stamp(0));
+    }
+    const insert = db.prepare(
+      `INSERT INTO notes (id, owner_id, title, content, created_at, updated_at)
+       VALUES (?, ?, ?, '', ?, ?)`,
+    );
+    for (let i = 1; i <= 5; i++) insert.run(`a${i}`, 'u1', `a${i}`, stamp(i), stamp(i));
+    insert.run('b1', 'u2', 'b1', stamp(9), stamp(9));
+    // Mismo created_at: el desempate por id mantiene el orden determinista.
+    insert.run('a6', 'u1', 'a6', stamp(5), stamp(5));
+
+    const repo = new SqliteNoteRepositoryImpl(db);
+    const ids = async (limit: number, offset: number) =>
+      (await repo.findAllByOwner('u1', { limit, offset })).map((n) => n.id);
+
+    expect(await ids(3, 0)).toEqual(['a6', 'a5', 'a4']);
+    expect(await ids(3, 3)).toEqual(['a3', 'a2', 'a1']);
+    expect(await ids(3, 6)).toEqual([]);
+    expect((await repo.findAll({ limit: 1, offset: 0 })).map((n) => n.id)).toEqual(['b1']);
+    db.close();
+  });
 });

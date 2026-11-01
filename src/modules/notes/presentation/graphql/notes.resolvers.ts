@@ -1,16 +1,16 @@
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
 
-import { toNoteDTO } from '../dto/notes.dto.js';
+import { toNoteDTO, toNotePageDTO } from '../dto/notes.dto.js';
 
 import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
 // Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const notesResolvers = {
   Query: {
-    notes: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
+    notes: async (_: unknown, args: { limit?: number; offset?: number }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
-      const notes = await ctx.container.modules.notes.useCases.listNotes.execute({ actor });
-      return notes.map(toNoteDTO);
+      const page = await ctx.container.modules.notes.useCases.listNotes.execute({ actor, ...args });
+      return toNotePageDTO(page);
     },
     note: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);

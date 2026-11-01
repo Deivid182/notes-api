@@ -4,6 +4,7 @@ import { NoteContent } from '#modules/notes/domain/note-content.vo';
 import { NoteTitle } from '#modules/notes/domain/note-title.vo';
 import { Note } from '#modules/notes/domain/note.entity';
 import { type NoteRepository } from '#modules/notes/domain/note.repository';
+import { type PageRequest } from '#modules/shared/domain/pagination';
 
 interface Row {
   id: string;
@@ -22,16 +23,20 @@ export class PostgresNoteRepositoryImpl implements NoteRepository {
     return rows[0] ? this.toEntity(rows[0]) : null;
   }
 
-  async findAllByOwner(ownerId: string): Promise<Note[]> {
+  async findAllByOwner(ownerId: string, page: PageRequest): Promise<Note[]> {
     const { rows } = await this.pool.query<Row>(
-      'SELECT * FROM notes WHERE owner_id = $1 ORDER BY created_at DESC',
-      [ownerId],
+      `SELECT * FROM notes WHERE owner_id = $1
+       ORDER BY created_at DESC, id DESC LIMIT $2 OFFSET $3`,
+      [ownerId, page.limit, page.offset],
     );
     return rows.map((r) => this.toEntity(r));
   }
 
-  async findAll(): Promise<Note[]> {
-    const { rows } = await this.pool.query<Row>('SELECT * FROM notes ORDER BY created_at DESC');
+  async findAll(page: PageRequest): Promise<Note[]> {
+    const { rows } = await this.pool.query<Row>(
+      'SELECT * FROM notes ORDER BY created_at DESC, id DESC LIMIT $1 OFFSET $2',
+      [page.limit, page.offset],
+    );
     return rows.map((r) => this.toEntity(r));
   }
 

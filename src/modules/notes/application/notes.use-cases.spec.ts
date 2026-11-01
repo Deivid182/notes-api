@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ForbiddenError, NotFoundError } from '#modules/shared/domain/error';
+import { ForbiddenError, NotFoundError, ValidationError } from '#modules/shared/domain/error';
 
 import { type Note } from '../domain/note.entity.js';
 
@@ -11,6 +11,7 @@ import { ListNotesUseCase } from './list-notes.use-case.js';
 import { UpdateNoteUseCase } from './update-note.use-case.js';
 
 import type { Actor } from '#modules/shared/domain/actor';
+import type { PageRequest } from '#modules/shared/domain/pagination';
 import type { NoteRepository } from '../domain/note.repository.js';
 
 class InMemoryNoteRepository implements NoteRepository {
@@ -18,11 +19,17 @@ class InMemoryNoteRepository implements NoteRepository {
   async findById(id: string) {
     return this.items.get(id) ?? null;
   }
-  async findAllByOwner(ownerId: string) {
-    return [...this.items.values()].filter((n) => n.ownerId === ownerId);
+  async findAllByOwner(ownerId: string, page: PageRequest) {
+    return this.window(
+      [...this.items.values()].filter((n) => n.ownerId === ownerId),
+      page,
+    );
   }
-  async findAll() {
-    return [...this.items.values()];
+  async findAll(page: PageRequest) {
+    return this.window([...this.items.values()], page);
+  }
+  private window(notes: Note[], { limit, offset }: PageRequest) {
+    return notes.slice(offset, offset + limit);
   }
   async save(note: Note) {
     this.items.set(note.id, note);
@@ -62,8 +69,30 @@ describe('notes use cases', () => {
     const { create, list } = setup();
     await create.execute({ actor: alice, title: 'a' });
     await create.execute({ actor: bob, title: 'b' });
-    expect(await list.execute({ actor: alice })).toHaveLength(1);
-    expect(await list.execute({ actor: admin })).toHaveLength(2);
+    expect((await list.execute({ actor: alice })).items).toHaveLength(1);
+    expect((await list.execute({ actor: admin })).items).toHaveLength(2);
+  });
+
+  it('paginates with hasMore and rejects invalid pages', async () => {
+    const { create, list } = setup();
+    for (let i = 0; i < 5; i++) await create.execute({ actor: alice, title: `n${i}` });
+
+    const first = await list.execute({ actor: alice, limit: 2 });
+    expect(first.items).toHaveLength(2);
+    expect(first).toMatchObject({ limit: 2, offset: 0, hasMore: true });
+
+    const last = await list.execute({ actor: alice, limit: 2, offset: 4 });
+    expect(last.items).toHaveLength(1);
+    expect(last.hasMore).toBe(false);
+
+    const exact = await list.execute({ actor: alice, limit: 5 });
+    expect(exact).toMatchObject({ hasMore: false });
+    expect(exact.items).toHaveLength(5);
+
+    await expect(list.execute({ actor: alice, limit: 0 })).rejects.toBeInstanceOf(ValidationError);
+    await expect(list.execute({ actor: alice, limit: 101 })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('forbids access to others notes, allows admin', async () => {

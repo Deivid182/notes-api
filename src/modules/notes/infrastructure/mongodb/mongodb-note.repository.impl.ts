@@ -2,6 +2,7 @@ import { NoteContent } from '#modules/notes/domain/note-content.vo';
 import { NoteTitle } from '#modules/notes/domain/note-title.vo';
 import { Note } from '#modules/notes/domain/note.entity';
 import { type NoteRepository } from '#modules/notes/domain/note.repository';
+import { type PageRequest } from '#modules/shared/domain/pagination';
 
 import type { Collection, Db } from 'mongodb';
 
@@ -26,13 +27,23 @@ export class MongoNoteRepositoryImpl implements NoteRepository {
     return doc ? this.toEntity(doc) : null;
   }
 
-  async findAllByOwner(ownerId: string): Promise<Note[]> {
-    const docs = await this.collection.find({ ownerId }).sort({ createdAt: -1 }).toArray();
+  async findAllByOwner(ownerId: string, page: PageRequest): Promise<Note[]> {
+    const docs = await this.collection
+      .find({ ownerId })
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(page.offset)
+      .limit(page.limit)
+      .toArray();
     return docs.map((d) => this.toEntity(d));
   }
 
-  async findAll(): Promise<Note[]> {
-    const docs = await this.collection.find().sort({ createdAt: -1 }).toArray();
+  async findAll(page: PageRequest): Promise<Note[]> {
+    const docs = await this.collection
+      .find()
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(page.offset)
+      .limit(page.limit)
+      .toArray();
     return docs.map((d) => this.toEntity(d));
   }
 

@@ -4,6 +4,7 @@ import { NoteContent } from '#modules/notes/domain/note-content.vo';
 import { NoteTitle } from '#modules/notes/domain/note-title.vo';
 import { Note } from '#modules/notes/domain/note.entity';
 import { type NoteRepository } from '#modules/notes/domain/note.repository';
+import { type PageRequest } from '#modules/shared/domain/pagination';
 
 interface Row {
   id: string;
@@ -23,17 +24,19 @@ export class SqliteNoteRepositoryImpl implements NoteRepository {
     return row ? this.toEntity(row) : null;
   }
 
-  async findAllByOwner(ownerId: string): Promise<Note[]> {
+  async findAllByOwner(ownerId: string, page: PageRequest): Promise<Note[]> {
     const rows = this.db
-      .prepare('SELECT * FROM notes WHERE owner_id = ? ORDER BY created_at DESC')
-      .all(ownerId) as unknown as Row[];
+      .prepare(
+        'SELECT * FROM notes WHERE owner_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?',
+      )
+      .all(ownerId, page.limit, page.offset) as unknown as Row[];
     return rows.map((r) => this.toEntity(r));
   }
 
-  async findAll(): Promise<Note[]> {
+  async findAll(page: PageRequest): Promise<Note[]> {
     const rows = this.db
-      .prepare('SELECT * FROM notes ORDER BY created_at DESC')
-      .all() as unknown as Row[];
+      .prepare('SELECT * FROM notes ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?')
+      .all(page.limit, page.offset) as unknown as Row[];
     return rows.map((r) => this.toEntity(r));
   }
 

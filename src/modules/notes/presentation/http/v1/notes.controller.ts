@@ -1,9 +1,9 @@
 import { actorOf } from '#modules/shared/presentation/http/v1/actor';
 
-import { toNoteDTO } from '../../dto/notes.dto.js';
+import { toNoteDTO, toNotePageDTO } from '../../dto/notes.dto.js';
 
 import type { NotesModule } from '#modules/notes/notes.module';
-import type { CreateNoteBody, UpdateNoteBody } from './schemas/notes.schemas.js';
+import type { CreateNoteBody, ListNotesQuery, UpdateNoteBody } from './schemas/notes.schemas.js';
 import type { Request, Response } from 'express';
 
 // Express 5 reenvía a `next` los rechazos de handlers async: no hace falta try/catch.
@@ -17,8 +17,10 @@ export class NotesController {
   };
 
   list = async (req: Request, res: Response) => {
-    const notes = await this.useCases.listNotes.execute({ actor: actorOf(req) });
-    res.status(200).json({ data: notes.map(toNoteDTO) });
+    const { limit, offset } = req.query as ListNotesQuery;
+    const page = await this.useCases.listNotes.execute({ actor: actorOf(req), limit, offset });
+    const { items, ...meta } = toNotePageDTO(page);
+    res.status(200).json({ data: items, meta });
   };
 
   get = async (req: Request, res: Response) => {
