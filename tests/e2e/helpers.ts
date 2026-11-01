@@ -24,7 +24,7 @@ export function buildTestApp() {
   const app = createHttpServer(container);
   const yoga = createYoga<object, GraphQLContext>({
     schema,
-    context: ({ request }) => buildContext({ container }, request),
+    context: ({ request }: { request: Request }) => buildContext({ container }, request),
   });
   return { app, yoga, container, close: () => db.close() };
 }
@@ -43,8 +43,7 @@ export async function gql(
     body: JSON.stringify({ query }),
   });
   return (await res.json()) as {
-    data: Record<string, Record<string, unknown> & { accessToken: string; id: string }> &
-      Record<string, unknown>;
+    data: Record<string, Record<string, unknown>>;
     errors?: Array<{ extensions: { code: string } }>;
   };
 }

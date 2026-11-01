@@ -13,7 +13,7 @@ describe('notes GraphQL e2e', () => {
         t.yoga,
         `mutation { register(email: "${email}", password: "secret123") { accessToken } }`,
       );
-      return r.data.register.accessToken as string;
+      return (r.data.register as { accessToken: string }).accessToken;
     };
     alice = await reg('alice@test.com');
     bob = await reg('bob@test.com');
@@ -34,7 +34,7 @@ describe('notes GraphQL e2e', () => {
 
   it('runs create/read/update/delete and enforces ownership', async () => {
     const c = await gql(t.yoga, 'mutation { createNote(title: "g", content: "c") { id } }', alice);
-    const id = c.data.createNote.id as string;
+    const id = (c.data.createNote as { id: string }).id;
 
     const u = await gql(
       t.yoga,
