@@ -12,4 +12,16 @@ describe('GraphQL schema', () => {
     expect(queryFields?.getUser).toBeDefined();
     expect(mutationFields?.createUser).toBeDefined();
   });
+
+  it('should expose me and the notes root fields', () => {
+    const queryFields = schema.getQueryType()?.getFields();
+    const mutationFields = schema.getMutationType()?.getFields();
+
+    expect(queryFields?.me).toBeDefined();
+    expect(queryFields?.notes).toBeDefined();
+    expect(queryFields?.note).toBeDefined();
+    expect(mutationFields?.createNote).toBeDefined();
+    expect(mutationFields?.updateNote).toBeDefined();
+    expect(mutationFields?.deleteNote).toBeDefined();
+  });
 });

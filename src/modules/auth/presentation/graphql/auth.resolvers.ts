@@ -3,6 +3,17 @@ import { toGraphQLError, requireUser } from '#modules/shared/presentation/graphq
 import { toUserDTO } from '#modules/users/presentation/http/v1/dtos/users.dto';
 
 export const authResolvers = {
+  Query: {
+    me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
+      const actor = requireUser(ctx);
+      try {
+        const user = await ctx.container.useCases.getUser.execute(actor.id);
+        return toUserDTO(user);
+      } catch (e) {
+        throw toGraphQLError(e);
+      }
+    },
+  },
   Mutation: {
     register: async (
       _: unknown,

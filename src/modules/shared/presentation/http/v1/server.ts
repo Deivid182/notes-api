@@ -1,6 +1,7 @@
 import express, { type Express } from 'express';
 
 import { createAuthRouter } from '#modules/auth/presentation/http/v1/auth.router';
+import { createNotesRouter } from '#modules/notes/presentation/http/v1/notes.router';
 import { type Container } from '#modules/shared/infrastructure/config/container';
 import { createUsersRouter } from '#modules/users/presentation/http/v1/users.router';
 
@@ -35,7 +36,7 @@ export function createHttpServer(container: Container): Express {
   // --- Routers por módulo ---
   app.use('/api/v1/users', createUsersRouter(container));
   app.use('/api/v1/auth', createAuthRouter(container));
-  // app.use('/api/notes', createNotesRouter(container));
+  app.use('/api/v1/notes', createNotesRouter(container));
 
   // --- Errores ---
   app.use(createNotFoundHandler());

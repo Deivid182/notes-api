@@ -1,4 +1,5 @@
 import { type AuthModule, createAuthModule } from '#modules/auth/auth.module';
+import { createNotesModule, type NotesModule } from '#modules/notes/notes.module';
 import { createUsersModule, type UsersModule } from '#modules/users/users.module.js';
 
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
@@ -20,9 +21,9 @@ export interface Container {
   modules: {
     users: UsersModule;
     auth: AuthModule;
-    // notes: NotesModule;
+    notes: NotesModule;
   };
-  useCases: UsersModule['useCases'] & AuthModule['useCases'] /* & NotesModule['useCases'] */;
+  useCases: UsersModule['useCases'] & AuthModule['useCases'] & NotesModule['useCases'];
 }
 
 export interface BuildContainerOptions {
@@ -35,7 +36,7 @@ export function buildContainer({ shared }: BuildContainerOptions): Container {
   //   notes (independiente)
   const users = createUsersModule(shared);
   const auth = createAuthModule({ shared, users });
-  // const notes = createNotesModule(shared);
+  const notes = createNotesModule(shared);
 
   return {
     env: shared.env,
@@ -43,11 +44,11 @@ export function buildContainer({ shared }: BuildContainerOptions): Container {
     clock: shared.clock,
     persistence: shared.persistence,
     tokenService: auth.tokenService,
-    modules: { users, auth /*  notes */ },
+    modules: { users, auth, notes },
     useCases: {
       ...users.useCases,
       ...auth.useCases,
-      // ...notes.useCases,
+      ...notes.useCases,
     },
   };
 }
