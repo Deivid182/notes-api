@@ -38,8 +38,8 @@ export function createAuthModule({ shared, users }: CreateAuthModuleDeps): AuthM
     refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN,
   });
 
-  const refreshTokenRepository = buildRefreshTokenRepository(env, persistence);
-  const tokenIssuer = new TokenIssuerService(tokenService, refreshTokenRepository, clock);
+  const refreshTokenRepository = buildRefreshTokenRepository(persistence);
+  const tokenIssuer = new TokenIssuerService(tokenService, refreshTokenRepository);
 
   // Reutiliza el CreateUserUseCase y PasswordHasher del módulo users.
   const registerUser = new RegisterUserUseCase(users.useCases.createUser, tokenIssuer);
@@ -63,21 +63,14 @@ export function createAuthModule({ shared, users }: CreateAuthModuleDeps): AuthM
 }
 
 function buildRefreshTokenRepository(
-  env: SharedContext['env'],
   persistence: SharedContext['persistence'],
 ): RefreshTokenRepository {
-  switch (env.DATABASE_ENGINE) {
-    case 'sqlite': {
-      if (!persistence.sqlite) throw new Error('sqlite persistence missing');
+  switch (persistence.engine) {
+    case 'sqlite':
       return new SqliteRefreshTokenRepositoryImpl(persistence.sqlite);
-    }
-    case 'postgres': {
-      if (!persistence.postgres) throw new Error('postgres persistence missing');
+    case 'postgres':
       return new PostgresRefreshTokenRepositoryImpl(persistence.postgres);
-    }
-    case 'mongodb': {
-      if (!persistence.mongodb) throw new Error('mongodb persistence missing');
+    case 'mongodb':
       return new MongoRefreshTokenRepositoryImpl(persistence.mongodb);
-    }
   }
 }

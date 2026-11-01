@@ -2,14 +2,14 @@ import { actorOf } from '#modules/shared/presentation/http/v1/actor';
 
 import { toUserDTO } from './dtos/users.dto.js';
 
-import type { Container } from '#modules/shared/infrastructure/config/container';
+import type { UsersModule } from '#modules/users/users.module';
 import type { NextFunction, Request, Response } from 'express';
 
 export class UsersController {
-  constructor(private container: Container) {}
+  constructor(private useCases: UsersModule['useCases']) {}
 
   async createUser(req: Request, res: Response, next: NextFunction) {
-    const { createUser } = this.container.modules.users.useCases;
+    const { createUser } = this.useCases;
     const { role, email, password } = req.body;
 
     try {
@@ -21,7 +21,7 @@ export class UsersController {
   }
 
   async getUser(req: Request, res: Response, next: NextFunction) {
-    const { getUser } = this.container.modules.users.useCases;
+    const { getUser } = this.useCases;
 
     try {
       const user = await getUser.execute({
@@ -35,7 +35,7 @@ export class UsersController {
   }
 
   async assignRole(req: Request, res: Response, next: NextFunction) {
-    const { assignRole } = this.container.modules.users.useCases;
+    const { assignRole } = this.useCases;
     const { role } = req.body;
 
     try {

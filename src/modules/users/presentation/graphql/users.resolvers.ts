@@ -13,7 +13,7 @@ export const usersResolvers = {
     getUser: async (_parent: unknown, args: { id: string }, context: GraphQLContext) => {
       const actor = requireUser(context);
       try {
-        const user = await context.container.useCases.getUser.execute({
+        const user = await context.container.modules.users.useCases.getUser.execute({
           actor,
           userId: args.id,
         });
@@ -31,7 +31,7 @@ export const usersResolvers = {
     ) => {
       requireAdmin(context);
       try {
-        const user = await context.container.useCases.createUser.execute(args);
+        const user = await context.container.modules.users.useCases.createUser.execute(args);
         return toUserDTO(user);
       } catch (e) {
         throw toGraphQLError(e);

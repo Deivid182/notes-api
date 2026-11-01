@@ -25,7 +25,7 @@ export interface UsersModule {
 export function createUsersModule(shared: SharedContext): UsersModule {
   const { env, persistence, clock } = shared;
 
-  const userRepository = buildUserRepository(env, persistence);
+  const userRepository = buildUserRepository(persistence);
   const passwordHasher = new BcryptPasswordHasher();
 
   const createUser = new CreateUserUseCase({
@@ -46,28 +46,13 @@ export function createUsersModule(shared: SharedContext): UsersModule {
   };
 }
 
-function buildUserRepository(
-  env: SharedContext['env'],
-  persistence: SharedContext['persistence'],
-): UserRepository {
-  const repositoryMap: Record<SharedContext['env']['DATABASE_ENGINE'], () => UserRepository> = {
-    sqlite: () => {
-      if (!persistence.sqlite) throw new Error('sqlite persistence missing');
+function buildUserRepository(persistence: SharedContext['persistence']): UserRepository {
+  switch (persistence.engine) {
+    case 'sqlite':
       return new SqliteUserRepositoryImpl(persistence.sqlite);
-    },
-    postgres: () => {
-      if (!persistence.postgres) throw new Error('postgres persistence missing');
+    case 'postgres':
       return new PostgresUserRepository(persistence.postgres);
-    },
-    mongodb: () => {
-      if (!persistence.mongodb) throw new Error('mongodb persistence missing');
+    case 'mongodb':
       return new MongoUserRepositoryImpl(persistence.mongodb);
-    },
-  };
-
-  const repositoryFactory = repositoryMap[env.DATABASE_ENGINE];
-  if (!repositoryFactory) {
-    throw new Error(`Unsupported database engine: ${env.DATABASE_ENGINE}`);
   }
-  return repositoryFactory();
 }

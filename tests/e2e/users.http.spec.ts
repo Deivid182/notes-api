@@ -26,7 +26,7 @@ describe('users HTTP e2e', () => {
     };
     alice = await reg('alice@test.com');
     bob = await reg('bob@test.com');
-    const created = await t.container.useCases.createUser.execute({
+    const created = await t.container.modules.users.useCases.createUser.execute({
       email: 'admin@test.com',
       password: 'secret123',
       role: 'admin',

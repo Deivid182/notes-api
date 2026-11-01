@@ -25,7 +25,7 @@ export async function buildContext(
 
   const token = header.slice('Bearer '.length).trim();
   try {
-    const payload = await container.tokenService.verifyAccessToken(token);
+    const payload = await container.modules.auth.tokenService.verifyAccessToken(token);
     return { container, user: { id: payload.sub, role: payload.role } };
   } catch {
     return { container, user: null };

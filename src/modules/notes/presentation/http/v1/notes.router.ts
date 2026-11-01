@@ -1,17 +1,23 @@
 import { Router } from 'express';
 
+import { type TokenService } from '#modules/auth/domain/interfaces/token-service.interface';
 import { AuthMiddleware } from '#modules/auth/presentation/http/v1/middlewares/auth.middleware';
-import { type Container } from '#modules/shared/infrastructure/config/container';
+import { type NotesModule } from '#modules/notes/notes.module';
 import { validateRequest } from '#modules/shared/presentation/http/v1/middlewares/validate-request.middleware';
 
 import { NotesController } from './notes.controller.js';
 import { createNoteSchema, updateNoteSchema } from './schemas/notes.schemas.js';
 
-export function createNotesRouter(container: Container): Router {
-  const router = Router();
-  const controller = new NotesController(container);
+export interface NotesRouterDeps {
+  useCases: NotesModule['useCases'];
+  tokenService: TokenService;
+}
 
-  router.use(AuthMiddleware(container.tokenService));
+export function createNotesRouter({ useCases, tokenService }: NotesRouterDeps): Router {
+  const router = Router();
+  const controller = new NotesController(useCases);
+
+  router.use(AuthMiddleware(tokenService));
 
   router.post('/', validateRequest(createNoteSchema), controller.create);
   router.get('/', controller.list);

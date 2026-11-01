@@ -1,7 +1,6 @@
 import { type TokenService } from '#modules/auth/domain/interfaces/token-service.interface';
 import { RefreshToken } from '#modules/auth/domain/refresh-token.entity';
 import { type RefreshTokenRepository } from '#modules/auth/domain/refresh-token.repository';
-import { type Clock } from '#modules/shared/domain/interfaces/clock.interface';
 import { newUuid } from '#modules/shared/domain/uuid';
 
 export interface IssuedTokens {
@@ -13,7 +12,6 @@ export class TokenIssuerService {
   constructor(
     private tokenService: TokenService,
     private refreshTokenRepository: RefreshTokenRepository,
-    private clock: Clock,
   ) {}
 
   async issue(userId: string, role: string): Promise<IssuedTokens> {
@@ -33,7 +31,6 @@ export class TokenIssuerService {
       }),
     );
 
-    void this.clock; // reservado para futuras trazas
     return { accessToken, refreshToken };
   }
 }

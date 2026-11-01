@@ -34,9 +34,29 @@ export function createHttpApp(container: Container): Express {
   });
 
   // --- Routers por módulo ---
-  app.use('/api/v1/users', createUsersRouter(container));
-  app.use('/api/v1/auth', createAuthRouter(container));
-  app.use('/api/v1/notes', createNotesRouter(container));
+  const { tokenService } = container.modules.auth;
+  app.use(
+    '/api/v1/users',
+    createUsersRouter({
+      useCases: container.modules.users.useCases,
+      tokenService,
+    }),
+  );
+  app.use(
+    '/api/v1/auth',
+    createAuthRouter({
+      useCases: container.modules.auth.useCases,
+      tokenService,
+      secureCookies: container.env.NODE_ENV === 'production',
+    }),
+  );
+  app.use(
+    '/api/v1/notes',
+    createNotesRouter({
+      useCases: container.modules.notes.useCases,
+      tokenService,
+    }),
+  );
 
   // --- Errores ---
   app.use(createNotFoundHandler());

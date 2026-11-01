@@ -9,7 +9,7 @@ export const notesResolvers = {
     notes: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       try {
-        const notes = await ctx.container.useCases.listNotes.execute({ actor });
+        const notes = await ctx.container.modules.notes.useCases.listNotes.execute({ actor });
         return notes.map(toNoteDTO);
       } catch (e) {
         throw toGraphQLError(e);
@@ -18,7 +18,10 @@ export const notesResolvers = {
     note: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       try {
-        const note = await ctx.container.useCases.getNote.execute({ actor, noteId: args.id });
+        const note = await ctx.container.modules.notes.useCases.getNote.execute({
+          actor,
+          noteId: args.id,
+        });
         return toNoteDTO(note);
       } catch (e) {
         throw toGraphQLError(e);
@@ -33,7 +36,10 @@ export const notesResolvers = {
     ) => {
       const actor = requireUser(ctx);
       try {
-        const note = await ctx.container.useCases.createNote.execute({ actor, ...args });
+        const note = await ctx.container.modules.notes.useCases.createNote.execute({
+          actor,
+          ...args,
+        });
         return toNoteDTO(note);
       } catch (e) {
         throw toGraphQLError(e);
@@ -46,7 +52,7 @@ export const notesResolvers = {
     ) => {
       const actor = requireUser(ctx);
       try {
-        const note = await ctx.container.useCases.updateNote.execute({
+        const note = await ctx.container.modules.notes.useCases.updateNote.execute({
           actor,
           noteId: args.id,
           title: args.title,
@@ -60,7 +66,7 @@ export const notesResolvers = {
     deleteNote: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       try {
-        await ctx.container.useCases.deleteNote.execute({ actor, noteId: args.id });
+        await ctx.container.modules.notes.useCases.deleteNote.execute({ actor, noteId: args.id });
         return true;
       } catch (e) {
         throw toGraphQLError(e);

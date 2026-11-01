@@ -24,7 +24,7 @@ describe('notes HTTP e2e', () => {
     alice = await register('alice@test.com');
     bob = await register('bob@test.com');
     // admin: crear usuario con rol admin y emitir token vía login
-    await t.container.useCases.createUser.execute({
+    await t.container.modules.users.useCases.createUser.execute({
       email: 'admin@test.com',
       password: 'secret123',
       role: 'admin',

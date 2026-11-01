@@ -1,16 +1,26 @@
 import { Router } from 'express';
 
-import { type Container } from '#modules/shared/infrastructure/config/container';
+import { type AuthModule } from '#modules/auth/auth.module';
 import { validateRequest } from '#modules/shared/presentation/http/v1/middlewares/validate-request.middleware';
 
 import { AuthController } from './auth.controller.js';
 import { loginSchema, logoutSchema, refreshSchema, registerSchema } from './auth.schemas.js';
 import { AuthMiddleware } from './middlewares/auth.middleware.js';
 
-export function createAuthRouter(container: Container): Router {
+export interface AuthRouterDeps {
+  useCases: AuthModule['useCases'];
+  tokenService: AuthModule['tokenService'];
+  secureCookies: boolean;
+}
+
+export function createAuthRouter({
+  useCases,
+  tokenService,
+  secureCookies,
+}: AuthRouterDeps): Router {
   const router = Router();
-  const controller = new AuthController(container);
-  const authMiddleware = AuthMiddleware(container.tokenService);
+  const controller = new AuthController(useCases, secureCookies);
+  const authMiddleware = AuthMiddleware(tokenService);
 
   router.post('/register', validateRequest(registerSchema), controller.register);
   router.post('/login', validateRequest(loginSchema), controller.login);

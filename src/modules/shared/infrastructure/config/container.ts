@@ -8,22 +8,19 @@ import type { Env } from './env.js';
 import type { Persistence, SharedContext } from './shared-context.js';
 
 /**
- * Fachada del composition root. Mantiene la forma "plana" que usan controllers
- * y resolvers (`container.useCases.X`, `container.tokenService`), pero delega
- * la construcción real a cada `<module>.module.ts`.
+ * Resultado del composition root. Los casos de uso y servicios de cada módulo se
+ * alcanzan siempre por `container.modules.<módulo>`; nada se aplana ni se duplica.
  */
 export interface Container {
   env: Env;
   logger: Logger;
   clock: Clock;
   persistence: Persistence;
-  tokenService: AuthModule['tokenService'];
   modules: {
     users: UsersModule;
     auth: AuthModule;
     notes: NotesModule;
   };
-  useCases: UsersModule['useCases'] & AuthModule['useCases'] & NotesModule['useCases'];
 }
 
 export interface BuildContainerOptions {
@@ -43,13 +40,7 @@ export function buildContainer({ shared }: BuildContainerOptions): Container {
     logger: shared.logger,
     clock: shared.clock,
     persistence: shared.persistence,
-    tokenService: auth.tokenService,
     modules: { users, auth, notes },
-    useCases: {
-      ...users.useCases,
-      ...auth.useCases,
-      ...notes.useCases,
-    },
   };
 }
 

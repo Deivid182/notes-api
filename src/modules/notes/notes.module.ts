@@ -22,8 +22,8 @@ export interface NotesModule {
 }
 
 export function createNotesModule(shared: SharedContext): NotesModule {
-  const { env, persistence, clock } = shared;
-  const noteRepository = buildNoteRepository(env, persistence);
+  const { persistence, clock } = shared;
+  const noteRepository = buildNoteRepository(persistence);
 
   return {
     noteRepository,
@@ -37,22 +37,13 @@ export function createNotesModule(shared: SharedContext): NotesModule {
   };
 }
 
-function buildNoteRepository(
-  env: SharedContext['env'],
-  persistence: SharedContext['persistence'],
-): NoteRepository {
-  switch (env.DATABASE_ENGINE) {
-    case 'sqlite': {
-      if (!persistence.sqlite) throw new Error('sqlite persistence missing');
+function buildNoteRepository(persistence: SharedContext['persistence']): NoteRepository {
+  switch (persistence.engine) {
+    case 'sqlite':
       return new SqliteNoteRepositoryImpl(persistence.sqlite);
-    }
-    case 'postgres': {
-      if (!persistence.postgres) throw new Error('postgres persistence missing');
+    case 'postgres':
       return new PostgresNoteRepositoryImpl(persistence.postgres);
-    }
-    case 'mongodb': {
-      if (!persistence.mongodb) throw new Error('mongodb persistence missing');
+    case 'mongodb':
       return new MongoNoteRepositoryImpl(persistence.mongodb);
-    }
   }
 }

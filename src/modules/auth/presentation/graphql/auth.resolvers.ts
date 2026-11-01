@@ -7,7 +7,7 @@ export const authResolvers = {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       try {
-        const user = await ctx.container.useCases.getUser.execute({
+        const user = await ctx.container.modules.users.useCases.getUser.execute({
           actor,
           userId: actor.id,
         });
@@ -24,7 +24,7 @@ export const authResolvers = {
       ctx: GraphQLContext,
     ) => {
       try {
-        const r = await ctx.container.useCases.registerUser.execute(args);
+        const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
         return {
           accessToken: r.accessToken,
           refreshToken: r.refreshToken,
@@ -36,7 +36,7 @@ export const authResolvers = {
     },
     login: async (_: unknown, args: { email: string; password: string }, ctx: GraphQLContext) => {
       try {
-        const r = await ctx.container.useCases.login.execute(args);
+        const r = await ctx.container.modules.auth.useCases.login.execute(args);
         return {
           accessToken: r.accessToken,
           refreshToken: r.refreshToken,
@@ -48,7 +48,7 @@ export const authResolvers = {
     },
     refreshToken: async (_: unknown, args: { refreshToken: string }, ctx: GraphQLContext) => {
       try {
-        const r = await ctx.container.useCases.refreshToken.execute(args);
+        const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
         return {
           accessToken: r.accessToken,
           refreshToken: r.refreshToken,
@@ -61,7 +61,7 @@ export const authResolvers = {
     logout: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const user = requireUser(ctx);
       try {
-        await ctx.container.useCases.logout.execute({ userId: user.id, all: true });
+        await ctx.container.modules.auth.useCases.logout.execute({ userId: user.id, all: true });
         return true;
       } catch (e) {
         throw toGraphQLError(e);

@@ -7,14 +7,20 @@ import { validateRequest } from '#modules/shared/presentation/http/v1/middleware
 import { assignRoleSchema, createUserSchema } from './schemas/users.schemas.js';
 import { UsersController } from './users.controller.js';
 
-import type { Container } from '#modules/shared/infrastructure/config/container';
+import type { TokenService } from '#modules/auth/domain/interfaces/token-service.interface';
+import type { UsersModule } from '#modules/users/users.module';
 
-export function createUsersRouter(container: Container) {
+export interface UsersRouterDeps {
+  useCases: UsersModule['useCases'];
+  tokenService: TokenService;
+}
+
+export function createUsersRouter({ useCases, tokenService }: UsersRouterDeps) {
   const router = Router();
-  const usersController = new UsersController(container);
+  const usersController = new UsersController(useCases);
 
   // Registro público: /auth/register. Aquí todo requiere sesión.
-  router.use(AuthMiddleware(container.tokenService));
+  router.use(AuthMiddleware(tokenService));
 
   // Crear usuarios con rol arbitrario es solo para admin.
   router.post('/', requireRole('admin'), validateRequest(createUserSchema), (req, res, next) =>

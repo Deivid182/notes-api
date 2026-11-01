@@ -21,7 +21,7 @@ export async function bootstrapPersistence(env: Env, logger: Logger): Promise<Pe
       const db = connectSqlite(env.DATABASE_URL);
       if (env.RUN_MIGRATIONS) runSqliteMigrations(db, logger);
       return {
-        persistence: { sqlite: db },
+        persistence: { engine: 'sqlite', sqlite: db },
         shutdown: async () => {
           db.close();
         },
@@ -32,7 +32,7 @@ export async function bootstrapPersistence(env: Env, logger: Logger): Promise<Pe
       const pool = connectPostgres(env.DATABASE_URL);
       if (env.RUN_MIGRATIONS) await runPostgresMigrations(pool, logger);
       return {
-        persistence: { postgres: pool },
+        persistence: { engine: 'postgres', postgres: pool },
         shutdown: async () => {
           await pool.end();
         },
@@ -43,7 +43,7 @@ export async function bootstrapPersistence(env: Env, logger: Logger): Promise<Pe
       const { client, db } = await connectMongo(env.DATABASE_URL, env.DATABASE_NAME);
       if (env.RUN_MIGRATIONS) await runMongoMigrations(db, logger);
       return {
-        persistence: { mongodb: db },
+        persistence: { engine: 'mongodb', mongodb: db },
         shutdown: async () => {
           await client.close();
         },
