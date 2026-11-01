@@ -1,0 +1,34 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+pnpm, Node >=24 (uses `node:sqlite`), ESM TypeScript (`NodeNext`).
+
+- `pnpm dev` — `tsx watch src/main.ts`
+- `pnpm build` / `pnpm start` — tsc to `dist/`, run `dist/main.js`
+- `pnpm lint` / `pnpm lint:fix`, `pnpm typecheck`, `pnpm format`
+- `pnpm test:unit` (`src/**/*.spec.ts`), `pnpm test:integration` (`tests/integration`), `pnpm test:e2e` (`tests/e2e`)
+- Single test: `pnpm vitest run --project unit path/to/file.spec.ts` (add `-t "name"` to filter)
+- `make docker-up` / `docker-down` — compose stack
+- Husky: pre-commit = lint-staged; pre-push = typecheck + lint + unit tests; commit-msg = commitlint (conventional commits).
+- Env: copy `.env.example` to `.env`. Validated by zod in `src/modules/shared/infrastructure/config/env.ts`.
+
+## Architecture
+
+Modular monolith, hexagonal/DDD-style. Modules under `src/modules/`: `users`, `auth`, `notes` (in progress, untracked), `shared`. Each module layers `domain/` (entities, VOs, repository interfaces) → `application/` (use cases) → `infrastructure/` (repository impls per DB engine, adapters) → `presentation/` (`http/v1` Express 5 + zod schemas/DTOs, `graphql` typedefs + resolvers).
+
+- **Composition root**: each module has `<name>.module.ts` exporting `createXModule(deps)` that wires use cases and picks the repository impl by `env.DATABASE_ENGINE` (sqlite | postgres | mongodb). `shared/infrastructure/config/container.ts` `buildContainer` builds modules in dependency order (users → auth; notes not yet registered — commented out) and exposes a flat `container.useCases.*` / `container.tokenService` used by controllers and resolvers. New module: add to `Container` interface, build order, and merge `useCases`.
+- **Bootstrap** (`src/main.ts`): connect persistence → run migrations if `RUN_MIGRATIONS` → `buildSharedContext` → `buildContainer` → start HTTP (`PORT_HTTP`) and/or GraphQL Yoga (`PORT_GRAPHQL`) per `PRESENTATION_PROTOCOL` (`http|graphql|both`) → graceful shutdown. Only SQLite is actually wired; postgres/mongodb connection code is commented out (repo impls exist; `persistence.postgres/mongodb` are `undefined`).
+- **Shared kernel** (`modules/shared`): ports (`Clock`, `Logger`, `PasswordHasher`, `UseCase`), `Email` VO, domain errors (`domain/error.ts`) mapped to HTTP by `error.middleware.ts`, SQLite connection + SQL migrations (`persistence/sqlite/migrations/*.sql`).
+- **Auth**: JWT access + refresh tokens; `TokenIssuerService` issues and persists refresh tokens; `RegisterUserUseCase` reuses users' `CreateUserUseCase`. Auth middleware in `auth/presentation/http/v1/middlewares`.
+- **Notes**: `application/actor.ts` + `authorization.ts` hold actor-based authorization for note ops.
+
+## Conventions / gotchas
+
+- Path aliases `#modules/<auth|users|notes|shared>/*` (tsconfig `paths`, package.json `imports` → `dist`, vitest alias). Relative imports within a module use `.js` extensions.
+- `package.json` `migrate:*` scripts point to `src/core/infrastructure/persistence/...`, which no longer exists (moved under `modules/shared`) — stale.
+- Source comments are largely in Spanish.
+- `data/notes.db*` (SQLite files) is tracked in git.
+- CI (`.github/workflows/ci.yml`) currently runs only lint + typecheck; test jobs are commented out. Coverage thresholds in `vitest.config.ts`: 80% lines/functions/statements, 70% branches.
