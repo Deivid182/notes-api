@@ -97,6 +97,21 @@ describe('auth refresh e2e', () => {
     expect(res.body.data.accessToken).toBeTruthy();
   });
 
+  it('reads the refresh token from the httpOnly cookie when the body has none', async () => {
+    const reg = await request(t.app)
+      .post('/api/v1/auth/register')
+      .send({ email: 'cookie@test.com', password: 'secret123' });
+    const setCookie = reg.headers['set-cookie'] as unknown as string[];
+    expect(setCookie.some((c) => c.startsWith('refresh_token=') && c.includes('HttpOnly'))).toBe(
+      true,
+    );
+    const cookie = setCookie.map((c) => c.split(';')[0]).join('; ');
+
+    const res = await request(t.app).post('/api/v1/auth/refresh').set('Cookie', cookie).send({});
+    expect(res.status).toBe(200);
+    expect(res.body.data.accessToken).toBeTruthy();
+  });
+
   it('rejects a missing or reused refresh token', async () => {
     expect((await request(t.app).post('/api/v1/auth/refresh').send({})).status).toBe(401);
 

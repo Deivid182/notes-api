@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 
 import { createAuthRouter } from '#modules/auth/presentation/http/v1/auth.router';
@@ -8,16 +9,13 @@ import { createUsersRouter } from '#modules/users/presentation/http/v1/users.rou
 import { createErrorHandler } from './middlewares/error.middleware.js';
 import { createNotFoundHandler } from './middlewares/not-found.middleware.js';
 
-// import type { Container } from '../../config/container.js';
-// import { createNotesRouter } from '../../modules/notes/presentation/http/notes.router.js';
-// import { createErrorHandler, createNotFoundHandler } from './middlewares/error-handler.js';
-
 export function createHttpApp(container: Container): Express {
   const app = express();
 
   // --- Global middlewares ---
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
+  app.use(cookieParser());
 
   // Request logger ligero (structured)
   app.use((req, _res, next) => {
