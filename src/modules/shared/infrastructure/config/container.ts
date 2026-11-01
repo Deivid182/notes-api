@@ -1,6 +1,6 @@
 import { type AuthModule, createAuthModule } from '#modules/auth/auth.module';
 import { createNotesModule, type NotesModule } from '#modules/notes/notes.module';
-import { createUsersModule, type UsersModule } from '#modules/users/users.module.js';
+import { createUsersModule, type UsersModule } from '#modules/users/users.module';
 
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';

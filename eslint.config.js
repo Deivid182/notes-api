@@ -12,6 +12,12 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   {
+    // Scripts de Node en JS plano (no pasan por tsc).
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+  },
+
+  {
     files: ['**/*.ts'],
     plugins: { 'import-x': importX },
     languageOptions: {
@@ -35,6 +41,19 @@ export default tseslint.config(
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
       'no-console': 'off',
+      // `#modules/*` ya agrega `.js` en el mapa `imports` de package.json: con extensión
+      // funciona en dev (alias) pero rompe en dist (`x.js.js`).
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^#modules/.*\\.js$',
+              message: 'Imports con alias #modules no llevan extensión .js.',
+            },
+          ],
+        },
+      ],
 
       // Orden de imports: builtin, external, internal, parent, sibling, index
       'import-x/order': [
