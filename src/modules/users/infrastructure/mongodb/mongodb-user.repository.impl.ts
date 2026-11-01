@@ -46,9 +46,9 @@ export class MongoUserRepositoryImpl implements UserRepository {
   private toEntity(doc: UserDoc): User {
     return User.create({
       id: doc._id,
-      email: Email.create(doc.email),
+      email: Email.restore(doc.email),
       passwordHash: doc.passwordHash,
-      role: Role.create(doc.role),
+      role: Role.restore(doc.role),
       createdAt: new Date(doc.createdAt),
       updatedAt: new Date(doc.updatedAt),
     });

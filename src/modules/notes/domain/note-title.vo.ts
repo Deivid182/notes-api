@@ -11,6 +11,11 @@ export class NoteTitle {
     return new NoteTitle(trimmed);
   }
 
+  /** Rehidrata desde persistencia sin revalidar. */
+  static restore(stored: string): NoteTitle {
+    return new NoteTitle(stored);
+  }
+
   toString(): string {
     return this.value;
   }

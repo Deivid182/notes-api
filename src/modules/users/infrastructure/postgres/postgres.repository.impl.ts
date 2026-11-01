@@ -50,9 +50,9 @@ export class PostgresUserRepository implements UserRepository {
   private toEntity(row: Row): User {
     return User.create({
       id: row.id,
-      email: Email.create(row.email),
+      email: Email.restore(row.email),
       passwordHash: row.password_hash,
-      role: Role.create(row.role),
+      role: Role.restore(row.role),
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     });

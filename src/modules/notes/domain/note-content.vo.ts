@@ -10,6 +10,11 @@ export class NoteContent {
     return new NoteContent(raw);
   }
 
+  /** Rehidrata desde persistencia sin revalidar. */
+  static restore(stored: string): NoteContent {
+    return new NoteContent(stored);
+  }
+
   toString(): string {
     return this.value;
   }

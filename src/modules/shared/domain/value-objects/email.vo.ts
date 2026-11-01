@@ -27,6 +27,11 @@ export class Email {
     return new Email(normalized);
   }
 
+  /** Rehidrata desde persistencia: no aplica reglas de negocio (pueden haber cambiado desde que se guardó). */
+  static restore(stored: string): Email {
+    return new Email(stored);
+  }
+
   toString(): string {
     return this.value;
   }

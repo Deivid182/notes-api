@@ -56,8 +56,8 @@ export class MongoNoteRepositoryImpl implements NoteRepository {
     return Note.create({
       id: doc._id,
       ownerId: doc.ownerId,
-      title: NoteTitle.create(doc.title),
-      content: NoteContent.create(doc.content),
+      title: NoteTitle.restore(doc.title),
+      content: NoteContent.restore(doc.content),
       createdAt: new Date(doc.createdAt),
       updatedAt: new Date(doc.updatedAt),
     });

@@ -16,6 +16,14 @@ describe('NoteTitle', () => {
   });
 });
 
+describe('restore', () => {
+  it('does not apply creation rules to stored values', () => {
+    expect(NoteTitle.restore('x'.repeat(200)).toString()).toHaveLength(200);
+    expect(NoteTitle.restore('').toString()).toBe('');
+    expect(NoteContent.restore('x'.repeat(20_000)).toString()).toHaveLength(20_000);
+  });
+});
+
 describe('NoteContent', () => {
   it('accepts empty and max-length content', () => {
     expect(NoteContent.create('').toString()).toBe('');

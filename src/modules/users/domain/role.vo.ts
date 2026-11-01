@@ -13,6 +13,11 @@ export class Role {
     return new Role(raw as RoleValue);
   }
 
+  /** Rehidrata desde persistencia sin validar contra la lista actual de roles. */
+  static restore(stored: string): Role {
+    return new Role(stored as RoleValue);
+  }
+
   static user(): Role {
     return new Role('user');
   }

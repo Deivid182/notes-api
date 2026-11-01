@@ -62,8 +62,8 @@ export class PostgresNoteRepositoryImpl implements NoteRepository {
     return Note.create({
       id: row.id,
       ownerId: row.owner_id,
-      title: NoteTitle.create(row.title),
-      content: NoteContent.create(row.content),
+      title: NoteTitle.restore(row.title),
+      content: NoteContent.restore(row.content),
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     });
