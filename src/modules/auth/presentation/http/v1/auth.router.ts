@@ -5,7 +5,7 @@ import { validateRequest } from '#modules/shared/presentation/http/v1/middleware
 
 import { AuthController } from './auth.controller.js';
 import { loginSchema, logoutSchema, refreshSchema, registerSchema } from './auth.schemas.js';
-import { AuthMiddleware } from './middlewares/auth.middleware.js';
+import { OptionalAuthMiddleware } from './middlewares/auth.middleware.js';
 
 export interface AuthRouterDeps {
   useCases: AuthModule['useCases'];
@@ -20,13 +20,14 @@ export function createAuthRouter({
 }: AuthRouterDeps): Router {
   const router = Router();
   const controller = new AuthController(useCases, secureCookies);
-  const authMiddleware = AuthMiddleware(tokenService);
+  const optionalAuth = OptionalAuthMiddleware(tokenService);
 
   router.post('/register', validateRequest(registerSchema), controller.register);
   router.post('/login', validateRequest(loginSchema), controller.login);
   // /refresh es público: el access token ya puede estar vencido; la autoridad es el refresh token.
   router.post('/refresh', validateRequest(refreshSchema), controller.refresh);
-  router.post('/logout', authMiddleware, validateRequest(logoutSchema), controller.logout);
+  // Logout no exige access token: con vencido o ausente basta el refresh token (cookie o body).
+  router.post('/logout', optionalAuth, validateRequest(logoutSchema), controller.logout);
 
   return router;
 }

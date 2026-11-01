@@ -127,3 +127,55 @@ describe('auth refresh e2e', () => {
     ).toBe(401);
   });
 });
+
+describe('auth logout e2e', () => {
+  const register = async (email: string) => {
+    const res = await request(t.app)
+      .post('/api/v1/auth/register')
+      .send({ email, password: 'secret123' });
+    return res.body.data as { accessToken: string; refreshToken: string };
+  };
+  const refresh = (refreshToken: string) =>
+    request(t.app).post('/api/v1/auth/refresh').send({ refreshToken });
+
+  it('logs out with only the refresh token (no or expired access token)', async () => {
+    const { refreshToken } = await register('lo1@test.com');
+    const res = await request(t.app)
+      .post('/api/v1/auth/logout')
+      .set('Authorization', 'Bearer not-a-valid-token')
+      .send({ refreshToken });
+    expect(res.status).toBe(200);
+    expect((await refresh(refreshToken)).status).toBe(401);
+  });
+
+  it('logs out everywhere using only the refresh token', async () => {
+    const first = await register('lo2@test.com');
+    const login = await request(t.app)
+      .post('/api/v1/auth/login')
+      .send({ email: 'lo2@test.com', password: 'secret123' });
+    const second = login.body.data.refreshToken as string;
+
+    const res = await request(t.app)
+      .post('/api/v1/auth/logout')
+      .send({ refreshToken: first.refreshToken, all: true });
+    expect(res.status).toBe(200);
+    expect((await refresh(first.refreshToken)).status).toBe(401);
+    expect((await refresh(second)).status).toBe(401);
+  });
+
+  it('cannot log out other users with someone elses refresh token', async () => {
+    const a = await register('lo3@test.com');
+    const b = await register('lo4@test.com');
+    await request(t.app).post('/api/v1/auth/logout').send({ refreshToken: a.refreshToken });
+    expect((await refresh(b.refreshToken)).status).toBe(200);
+  });
+
+  it('rejects "all" when nothing identifies the caller', async () => {
+    const res = await request(t.app).post('/api/v1/auth/logout').send({ all: true });
+    expect(res.status).toBe(401);
+  });
+
+  it('is a harmless no-op with no credentials', async () => {
+    expect((await request(t.app).post('/api/v1/auth/logout').send({})).status).toBe(200);
+  });
+});

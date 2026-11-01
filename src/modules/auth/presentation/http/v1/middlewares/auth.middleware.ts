@@ -19,3 +19,22 @@ export const AuthMiddleware = (tokenService: TokenService): RequestHandler => {
     }
   };
 };
+
+/**
+ * Identifica al usuario si trae un access token válido; si falta o está vencido sigue como
+ * anónimo. Para endpoints que aceptan otra credencial (p. ej. logout con refresh token).
+ */
+export const OptionalAuthMiddleware = (tokenService: TokenService): RequestHandler => {
+  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    const header = req.headers.authorization;
+    if (header?.startsWith('Bearer ')) {
+      try {
+        const payload = await tokenService.verifyAccessToken(header.slice('Bearer '.length).trim());
+        req.user = { id: payload.sub, role: payload.role };
+      } catch {
+        // Token inválido o vencido: se trata como anónimo.
+      }
+    }
+    next();
+  };
+};
