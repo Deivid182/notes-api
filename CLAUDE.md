@@ -30,6 +30,7 @@ Modular monolith, hexagonal/DDD-style. Modules under `src/modules/`: `users`, `a
 ## Conventions / gotchas
 
 - Path aliases `#modules/<auth|users|notes|shared>/*` (tsconfig `paths`, package.json `imports` → `dist`, vitest alias). Relative imports within a module use `.js` extensions.
+- `tests/tsconfig.json` is the TS project for tests (`moduleResolution: Bundler`, includes `src/`). Root `tsconfig.json` only covers `src/`; under NodeNext its `paths` fall back to `dist/`, so don't typecheck tests with it.
 - Migration `.sql` files are read from `__dirname` at runtime; `tsc` does not copy them to `dist/`, so `pnpm start` with `RUN_MIGRATIONS=true` will not find them.
 - Source comments are largely in Spanish.
 - `data/notes.db*` (SQLite files) is tracked in git.
