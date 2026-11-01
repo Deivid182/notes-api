@@ -1,8 +1,10 @@
-import { type AuthModule } from '#modules/auth/auth.module';
+import { UnauthorizedError } from '#modules/shared/domain/error';
 
-import { toAuthPayload } from './auth.dto.js';
+import { toAuthPayload } from '../../dto/auth.dto.js';
 
-import type { Request, Response, NextFunction } from 'express';
+import type { AuthModule } from '#modules/auth/auth.module';
+import type { LoginBody, LogoutBody, RefreshBody, RegisterBody } from './auth.schemas.js';
+import type { Request, Response } from 'express';
 
 const REFRESH_COOKIE = 'refresh_token';
 
@@ -12,61 +14,42 @@ export class AuthController {
     private secureCookies: boolean,
   ) {}
 
-  register = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { email, password } = req.body as { email: string; password: string };
-      const result = await this.useCases.registerUser.execute({ email, password });
-      this.setRefreshCookie(res, result.refreshToken);
-      res
-        .status(201)
-        .json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
-    } catch (e) {
-      next(e);
-    }
+  register = async (req: Request, res: Response) => {
+    const { email, password } = req.body as RegisterBody;
+    const result = await this.useCases.registerUser.execute({ email, password });
+    this.setRefreshCookie(res, result.refreshToken);
+    res
+      .status(201)
+      .json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
-  login = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { email, password } = req.body as { email: string; password: string };
-      const result = await this.useCases.login.execute({ email, password });
-      this.setRefreshCookie(res, result.refreshToken);
-      res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
-    } catch (e) {
-      next(e);
-    }
+  login = async (req: Request, res: Response) => {
+    const { email, password } = req.body as LoginBody;
+    const result = await this.useCases.login.execute({ email, password });
+    this.setRefreshCookie(res, result.refreshToken);
+    res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
-  refresh = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const fromCookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
-      const fromBody = (req.body as { refreshToken?: string }).refreshToken;
-      const refreshToken = fromBody ?? fromCookie;
-      if (!refreshToken) {
-        res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Missing refresh token' } });
-        return;
-      }
-      const result = await this.useCases.refreshToken.execute({ refreshToken });
-      this.setRefreshCookie(res, result.refreshToken);
-      res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
-    } catch (e) {
-      next(e);
-    }
+  refresh = async (req: Request, res: Response) => {
+    const fromCookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+    const refreshToken = (req.body as RefreshBody).refreshToken ?? fromCookie;
+    if (!refreshToken) throw new UnauthorizedError('Missing refresh token');
+
+    const result = await this.useCases.refreshToken.execute({ refreshToken });
+    this.setRefreshCookie(res, result.refreshToken);
+    res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
-  logout = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const fromCookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
-      const body = req.body as { refreshToken?: string; all?: boolean };
-      await this.useCases.logout.execute({
-        refreshToken: body.refreshToken ?? fromCookie,
-        userId: req.user?.id,
-        all: body.all,
-      });
-      res.clearCookie(REFRESH_COOKIE, { path: '/' });
-      res.json({ data: { success: true } });
-    } catch (e) {
-      next(e);
-    }
+  logout = async (req: Request, res: Response) => {
+    const fromCookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+    const body = req.body as LogoutBody;
+    await this.useCases.logout.execute({
+      refreshToken: body.refreshToken ?? fromCookie,
+      userId: req.user?.id,
+      all: body.all,
+    });
+    res.clearCookie(REFRESH_COOKIE, { path: '/' });
+    res.json({ data: { success: true } });
   };
 
   private setRefreshCookie(res: Response, token: string) {

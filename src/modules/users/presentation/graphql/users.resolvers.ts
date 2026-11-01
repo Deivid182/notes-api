@@ -1,41 +1,30 @@
-import {
-  requireAdmin,
-  requireUser,
-  toGraphQLError,
-} from '#modules/shared/presentation/graphql/helpers';
+import { requireAdmin, requireUser } from '#modules/shared/presentation/graphql/helpers';
 
-import { toUserDTO } from '../http/v1/dtos/users.dto.js';
+import { toUserDTO } from '../dto/users.dto.js';
 
 import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
+// Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const usersResolvers = {
   Query: {
-    getUser: async (_parent: unknown, args: { id: string }, context: GraphQLContext) => {
-      const actor = requireUser(context);
-      try {
-        const user = await context.container.modules.users.useCases.getUser.execute({
-          actor,
-          userId: args.id,
-        });
-        return toUserDTO(user);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+    getUser: async (_parent: unknown, args: { id: string }, ctx: GraphQLContext) => {
+      const actor = requireUser(ctx);
+      const user = await ctx.container.modules.users.useCases.getUser.execute({
+        actor,
+        userId: args.id,
+      });
+      return toUserDTO(user);
     },
   },
   Mutation: {
     createUser: async (
       _parent: unknown,
       args: { email: string; password: string; role?: string },
-      context: GraphQLContext,
+      ctx: GraphQLContext,
     ) => {
-      requireAdmin(context);
-      try {
-        const user = await context.container.modules.users.useCases.createUser.execute(args);
-        return toUserDTO(user);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      requireAdmin(ctx);
+      const user = await ctx.container.modules.users.useCases.createUser.execute(args);
+      return toUserDTO(user);
     },
   },
 };

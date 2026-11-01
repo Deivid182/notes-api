@@ -4,7 +4,7 @@ export function toUserDTO(user: User) {
   return {
     id: user.id,
     email: user.email.toString(),
-    role: user.role.value,
+    role: user.role.toString(),
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

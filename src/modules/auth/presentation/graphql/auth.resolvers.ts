@@ -1,20 +1,19 @@
 import { type GraphQLContext } from '#modules/shared/presentation/graphql/context';
-import { toGraphQLError, requireUser } from '#modules/shared/presentation/graphql/helpers';
-import { toUserDTO } from '#modules/users/presentation/http/v1/dtos/users.dto';
+import { requireUser } from '#modules/shared/presentation/graphql/helpers';
+import { toUserDTO } from '#modules/users/presentation/dto/users.dto';
 
+import { toAuthPayload } from '../dto/auth.dto.js';
+
+// Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const authResolvers = {
   Query: {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
-      try {
-        const user = await ctx.container.modules.users.useCases.getUser.execute({
-          actor,
-          userId: actor.id,
-        });
-        return toUserDTO(user);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const user = await ctx.container.modules.users.useCases.getUser.execute({
+        actor,
+        userId: actor.id,
+      });
+      return toUserDTO(user);
     },
   },
   Mutation: {
@@ -23,49 +22,21 @@ export const authResolvers = {
       args: { email: string; password: string },
       ctx: GraphQLContext,
     ) => {
-      try {
-        const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
-        return {
-          accessToken: r.accessToken,
-          refreshToken: r.refreshToken,
-          user: toUserDTO(r.user),
-        };
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
+      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     login: async (_: unknown, args: { email: string; password: string }, ctx: GraphQLContext) => {
-      try {
-        const r = await ctx.container.modules.auth.useCases.login.execute(args);
-        return {
-          accessToken: r.accessToken,
-          refreshToken: r.refreshToken,
-          user: toUserDTO(r.user),
-        };
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const r = await ctx.container.modules.auth.useCases.login.execute(args);
+      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     refreshToken: async (_: unknown, args: { refreshToken: string }, ctx: GraphQLContext) => {
-      try {
-        const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
-        return {
-          accessToken: r.accessToken,
-          refreshToken: r.refreshToken,
-          user: toUserDTO(r.user),
-        };
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
+      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     logout: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const user = requireUser(ctx);
-      try {
-        await ctx.container.modules.auth.useCases.logout.execute({ userId: user.id, all: true });
-        return true;
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      await ctx.container.modules.auth.useCases.logout.execute({ userId: user.id, all: true });
+      return true;
     },
   },
 };

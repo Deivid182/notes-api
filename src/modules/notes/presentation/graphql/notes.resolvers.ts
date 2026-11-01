@@ -1,31 +1,24 @@
-import { requireUser, toGraphQLError } from '#modules/shared/presentation/graphql/helpers';
+import { requireUser } from '#modules/shared/presentation/graphql/helpers';
 
-import { toNoteDTO } from '../http/v1/dtos/notes.dto.js';
+import { toNoteDTO } from '../dto/notes.dto.js';
 
 import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
+// Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const notesResolvers = {
   Query: {
     notes: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
-      try {
-        const notes = await ctx.container.modules.notes.useCases.listNotes.execute({ actor });
-        return notes.map(toNoteDTO);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const notes = await ctx.container.modules.notes.useCases.listNotes.execute({ actor });
+      return notes.map(toNoteDTO);
     },
     note: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
-      try {
-        const note = await ctx.container.modules.notes.useCases.getNote.execute({
-          actor,
-          noteId: args.id,
-        });
-        return toNoteDTO(note);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const note = await ctx.container.modules.notes.useCases.getNote.execute({
+        actor,
+        noteId: args.id,
+      });
+      return toNoteDTO(note);
     },
   },
   Mutation: {
@@ -35,15 +28,11 @@ export const notesResolvers = {
       ctx: GraphQLContext,
     ) => {
       const actor = requireUser(ctx);
-      try {
-        const note = await ctx.container.modules.notes.useCases.createNote.execute({
-          actor,
-          ...args,
-        });
-        return toNoteDTO(note);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const note = await ctx.container.modules.notes.useCases.createNote.execute({
+        actor,
+        ...args,
+      });
+      return toNoteDTO(note);
     },
     updateNote: async (
       _: unknown,
@@ -51,26 +40,21 @@ export const notesResolvers = {
       ctx: GraphQLContext,
     ) => {
       const actor = requireUser(ctx);
-      try {
-        const note = await ctx.container.modules.notes.useCases.updateNote.execute({
-          actor,
-          noteId: args.id,
-          title: args.title,
-          content: args.content,
-        });
-        return toNoteDTO(note);
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      const note = await ctx.container.modules.notes.useCases.updateNote.execute({
+        actor,
+        noteId: args.id,
+        title: args.title,
+        content: args.content,
+      });
+      return toNoteDTO(note);
     },
     deleteNote: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
-      try {
-        await ctx.container.modules.notes.useCases.deleteNote.execute({ actor, noteId: args.id });
-        return true;
-      } catch (e) {
-        throw toGraphQLError(e);
-      }
+      await ctx.container.modules.notes.useCases.deleteNote.execute({
+        actor,
+        noteId: args.id,
+      });
+      return true;
     },
   },
 };

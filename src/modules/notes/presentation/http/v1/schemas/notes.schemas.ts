@@ -9,3 +9,6 @@ export const updateNoteSchema = z.object({
   title: z.string().min(1, 'Title cannot be empty').optional(),
   content: z.string().optional(),
 });
+
+export type CreateNoteBody = z.infer<typeof createNoteSchema>;
+export type UpdateNoteBody = z.infer<typeof updateNoteSchema>;

@@ -9,3 +9,6 @@ export const createUserSchema = z.object({
 export const assignRoleSchema = z.object({
   role: z.string().min(1, 'Role is required'),
 });
+
+export type CreateUserBody = z.infer<typeof createUserSchema>;
+export type AssignRoleBody = z.infer<typeof assignRoleSchema>;

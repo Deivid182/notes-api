@@ -3,6 +3,7 @@ import { createServer as createNodeServer, type Server as NodeServer } from 'nod
 import { createYoga, type YogaServerInstance } from 'graphql-yoga';
 
 import { buildContext, type GraphQLContext } from './context.js';
+import { createMaskError } from './helpers.js';
 import { schema } from './schema.js';
 
 import type { Container } from '#modules/shared/infrastructure/config/container';
@@ -20,6 +21,7 @@ export function createGraphQLServer(container: Container, port: number): GraphQL
     schema: schema,
     context: ({ request }) => buildContext({ container }, request),
     graphqlEndpoint: '/graphql',
+    maskedErrors: { maskError: createMaskError(container.logger) },
     graphiql: container.env.NODE_ENV !== 'production',
     landingPage: container.env.NODE_ENV !== 'production',
   });

@@ -1,52 +1,35 @@
 import { actorOf } from '#modules/shared/presentation/http/v1/actor';
 
-import { toUserDTO } from './dtos/users.dto.js';
+import { toUserDTO } from '../../dto/users.dto.js';
 
 import type { UsersModule } from '#modules/users/users.module';
-import type { NextFunction, Request, Response } from 'express';
+import type { AssignRoleBody, CreateUserBody } from './schemas/users.schemas.js';
+import type { Request, Response } from 'express';
 
 export class UsersController {
   constructor(private useCases: UsersModule['useCases']) {}
 
-  async createUser(req: Request, res: Response, next: NextFunction) {
-    const { createUser } = this.useCases;
-    const { role, email, password } = req.body;
+  createUser = async (req: Request, res: Response) => {
+    const { email, password, role } = req.body as CreateUserBody;
+    const user = await this.useCases.createUser.execute({ email, password, role });
+    res.status(201).json({ data: toUserDTO(user) });
+  };
 
-    try {
-      const user = await createUser.execute({ email, password, role });
-      res.status(201).json({ data: toUserDTO(user) });
-    } catch (e) {
-      next(e);
-    }
-  }
+  getUser = async (req: Request, res: Response) => {
+    const user = await this.useCases.getUser.execute({
+      actor: actorOf(req),
+      userId: req.params.id as string,
+    });
+    res.status(200).json({ data: toUserDTO(user) });
+  };
 
-  async getUser(req: Request, res: Response, next: NextFunction) {
-    const { getUser } = this.useCases;
-
-    try {
-      const user = await getUser.execute({
-        actor: actorOf(req),
-        userId: req.params.id as string,
-      });
-      res.status(200).json({ data: toUserDTO(user) });
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  async assignRole(req: Request, res: Response, next: NextFunction) {
-    const { assignRole } = this.useCases;
-    const { role } = req.body;
-
-    try {
-      const user = await assignRole.execute({
-        actor: actorOf(req),
-        userId: req.params.id as string,
-        role,
-      });
-      res.status(200).json({ data: toUserDTO(user) });
-    } catch (e) {
-      next(e);
-    }
-  }
+  assignRole = async (req: Request, res: Response) => {
+    const { role } = req.body as AssignRoleBody;
+    const user = await this.useCases.assignRole.execute({
+      actor: actorOf(req),
+      userId: req.params.id as string,
+      role,
+    });
+    res.status(200).json({ data: toUserDTO(user) });
+  };
 }

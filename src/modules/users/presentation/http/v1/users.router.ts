@@ -23,15 +23,16 @@ export function createUsersRouter({ useCases, tokenService }: UsersRouterDeps) {
   router.use(AuthMiddleware(tokenService));
 
   // Crear usuarios con rol arbitrario es solo para admin.
-  router.post('/', requireRole('admin'), validateRequest(createUserSchema), (req, res, next) =>
-    usersController.createUser(req, res, next),
+  router.post(
+    '/',
+    requireRole('admin'),
+    validateRequest(createUserSchema),
+    usersController.createUser,
   );
   // Propio perfil o admin (lo decide GetUserUseCase).
-  router.get('/:id', (req, res, next) => usersController.getUser(req, res, next));
+  router.get('/:id', usersController.getUser);
   // Solo admin (lo decide AssignRoleUseCase).
-  router.post('/:id/assign-role', validateRequest(assignRoleSchema), (req, res, next) =>
-    usersController.assignRole(req, res, next),
-  );
+  router.post('/:id/assign-role', validateRequest(assignRoleSchema), usersController.assignRole);
 
   return router;
 }
