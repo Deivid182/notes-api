@@ -1,8 +1,7 @@
+import { type Actor } from '#modules/shared/domain/actor';
 import { ForbiddenError } from '#modules/shared/domain/error';
 
 import { type Note } from '../domain/note.entity.js';
-
-import { type Actor } from './actor.js';
 
 export function assertCanRead(note: Note, actor: Actor): void {
   if (note.ownerId === actor.id) return;

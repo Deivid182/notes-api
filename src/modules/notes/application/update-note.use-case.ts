@@ -5,8 +5,8 @@ import { NoteTitle } from '../domain/note-title.vo.js';
 
 import { assertCanWrite } from './authorization.js';
 
+import type { Actor } from '#modules/shared/domain/actor';
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
-import type { Actor } from './actor.js';
 import type { Note } from '../domain/note.entity.js';
 import type { NoteRepository } from '../domain/note.repository.js';
 

@@ -52,4 +52,23 @@ describe('notes GraphQL e2e', () => {
     const missing = await gql(t.yoga, `{ note(id: "${id}") { id } }`, alice);
     expect(missing.errors?.[0]?.extensions.code).toBe('NOT_FOUND');
   });
+
+  it('protects the users operations', async () => {
+    const me = await gql(t.yoga, '{ me { id } }', alice);
+    const aliceId = (me.data.me as { id: string }).id;
+
+    const anonGet = await gql(t.yoga, `{ getUser(id: "${aliceId}") { id } }`);
+    expect(anonGet.errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+
+    const otherGet = await gql(t.yoga, `{ getUser(id: "${aliceId}") { id } }`, bob);
+    expect(otherGet.errors?.[0]?.extensions.code).toBe('FORBIDDEN');
+
+    const selfGet = await gql(t.yoga, `{ getUser(id: "${aliceId}") { id } }`, alice);
+    expect(selfGet.data.getUser).toEqual({ id: aliceId });
+
+    const create =
+      'mutation { createUser(email: "n@test.com", password: "secret123", role: "admin") { role } }';
+    expect((await gql(t.yoga, create)).errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+    expect((await gql(t.yoga, create, alice)).errors?.[0]?.extensions.code).toBe('FORBIDDEN');
+  });
 });

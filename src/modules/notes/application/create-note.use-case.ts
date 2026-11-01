@@ -4,8 +4,8 @@ import { NoteContent } from '../domain/note-content.vo.js';
 import { NoteTitle } from '../domain/note-title.vo.js';
 import { Note } from '../domain/note.entity.js';
 
+import type { Actor } from '#modules/shared/domain/actor';
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
-import type { Actor } from './actor.js';
 import type { NoteRepository } from '../domain/note.repository.js';
 
 export interface CreateNoteInput {

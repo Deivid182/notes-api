@@ -21,6 +21,14 @@ export function requireUser(ctx: GraphQLContext): AuthUser {
   return ctx.user;
 }
 
+export function requireAdmin(ctx: GraphQLContext): AuthUser {
+  const user = requireUser(ctx);
+  if (user.role !== 'admin') {
+    throw new GraphQLError('Admin role required', { extensions: { code: 'FORBIDDEN' } });
+  }
+  return user;
+}
+
 export function toGraphQLError(err: unknown): GraphQLError {
   if (err instanceof DomainError) {
     return new GraphQLError(err.message, {

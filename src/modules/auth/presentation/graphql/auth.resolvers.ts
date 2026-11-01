@@ -7,7 +7,10 @@ export const authResolvers = {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       try {
-        const user = await ctx.container.useCases.getUser.execute(actor.id);
+        const user = await ctx.container.useCases.getUser.execute({
+          actor,
+          userId: actor.id,
+        });
         return toUserDTO(user);
       } catch (e) {
         throw toGraphQLError(e);

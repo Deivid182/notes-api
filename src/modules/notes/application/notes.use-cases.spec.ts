@@ -10,7 +10,7 @@ import { GetNoteUseCase } from './get-note.use-case.js';
 import { ListNotesUseCase } from './list-notes.use-case.js';
 import { UpdateNoteUseCase } from './update-note.use-case.js';
 
-import type { Actor } from './actor.js';
+import type { Actor } from '#modules/shared/domain/actor';
 import type { NoteRepository } from '../domain/note.repository.js';
 
 class InMemoryNoteRepository implements NoteRepository {

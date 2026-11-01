@@ -1,4 +1,8 @@
-import { toGraphQLError } from '#modules/shared/presentation/graphql/helpers';
+import {
+  requireAdmin,
+  requireUser,
+  toGraphQLError,
+} from '#modules/shared/presentation/graphql/helpers';
 
 import { toUserDTO } from '../http/v1/dtos/users.dto.js';
 
@@ -7,14 +11,12 @@ import type { GraphQLContext } from '#modules/shared/presentation/graphql/contex
 export const usersResolvers = {
   Query: {
     getUser: async (_parent: unknown, args: { id: string }, context: GraphQLContext) => {
+      const actor = requireUser(context);
       try {
-        const { container } = context;
-        const { getUser } = container.useCases;
-        // return await getUser.execute(args.id);
-        const user = await getUser.execute(args.id);
-        if (!user) {
-          throw new Error('User not found');
-        }
+        const user = await context.container.useCases.getUser.execute({
+          actor,
+          userId: args.id,
+        });
         return toUserDTO(user);
       } catch (e) {
         throw toGraphQLError(e);
@@ -27,10 +29,9 @@ export const usersResolvers = {
       args: { email: string; password: string; role?: string },
       context: GraphQLContext,
     ) => {
+      requireAdmin(context);
       try {
-        const { container } = context;
-        const { createUser } = container.useCases;
-        const user = await createUser.execute(args);
+        const user = await context.container.useCases.createUser.execute(args);
         return toUserDTO(user);
       } catch (e) {
         throw toGraphQLError(e);

@@ -1,3 +1,5 @@
+import { actorOf } from '#modules/shared/presentation/http/v1/actor';
+
 import { toUserDTO } from './dtos/users.dto.js';
 
 import type { Container } from '#modules/shared/infrastructure/config/container';
@@ -20,13 +22,12 @@ export class UsersController {
 
   async getUser(req: Request, res: Response, next: NextFunction) {
     const { getUser } = this.container.modules.users.useCases;
-    const { id } = req.params;
 
     try {
-      const user = await getUser.execute(id as string);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
+      const user = await getUser.execute({
+        actor: actorOf(req),
+        userId: req.params.id as string,
+      });
       res.status(200).json({ data: toUserDTO(user) });
     } catch (e) {
       next(e);
@@ -35,11 +36,14 @@ export class UsersController {
 
   async assignRole(req: Request, res: Response, next: NextFunction) {
     const { assignRole } = this.container.modules.users.useCases;
-    const { id } = req.params;
     const { role } = req.body;
 
     try {
-      const user = await assignRole.execute({ userId: id as string, role });
+      const user = await assignRole.execute({
+        actor: actorOf(req),
+        userId: req.params.id as string,
+        role,
+      });
       res.status(200).json({ data: toUserDTO(user) });
     } catch (e) {
       next(e);

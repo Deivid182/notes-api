@@ -1,4 +1,4 @@
-import type { Actor } from './actor.js';
+import type { Actor } from '#modules/shared/domain/actor';
 import type { Note } from '../domain/note.entity.js';
 import type { NoteRepository } from '../domain/note.repository.js';
 

@@ -2,7 +2,7 @@ import { NotFoundError } from '#modules/shared/domain/error';
 
 import { assertCanWrite } from './authorization.js';
 
-import type { Actor } from './actor.js';
+import type { Actor } from '#modules/shared/domain/actor';
 import type { NoteRepository } from '../domain/note.repository.js';
 
 export interface DeleteNoteInput {

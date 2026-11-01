@@ -1,14 +1,9 @@
-import { UnauthorizedError } from '#modules/shared/domain/error';
+import { actorOf } from '#modules/shared/presentation/http/v1/actor';
 
 import { toNoteDTO } from './dtos/notes.dto.js';
 
 import type { Container } from '#modules/shared/infrastructure/config/container';
 import type { NextFunction, Request, Response } from 'express';
-
-function actorOf(req: Request) {
-  if (!req.user) throw new UnauthorizedError('Authentication required');
-  return req.user;
-}
 
 export class NotesController {
   constructor(private container: Container) {}
