@@ -32,6 +32,8 @@ export default defineConfig({
       {
         test: {
           name: 'e2e',
+          // graphql debe cargarse una sola vez para que `instanceof GraphQLError` funcione en yoga.
+          server: { deps: { inline: [/graphql/] } },
           include: ['tests/e2e/**/*.spec.ts'],
           setupFiles: ['./tests/e2e/setup.ts'],
           environment: 'node',
