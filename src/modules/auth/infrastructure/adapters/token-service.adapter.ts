@@ -20,13 +20,13 @@ export class JwtTokenServiceAdapter implements TokenService {
 
   async generateAccessToken(payload: AccessTokenPayload): Promise<string> {
     return jwt.sign(payload, this.cfg.accessSecret, {
-      expiresIn: this.cfg.accessExpiresIn as SignOptions['expiresIn'],
+      expiresIn: toExpiresIn(this.cfg.accessExpiresIn),
     });
   }
 
   async generateRefreshToken(payload: RefreshTokenPayload): Promise<string> {
     return jwt.sign(payload, this.cfg.refreshSecret, {
-      expiresIn: this.cfg.refreshExpiresIn as SignOptions['expiresIn'],
+      expiresIn: toExpiresIn(this.cfg.refreshExpiresIn),
     });
   }
 
@@ -48,6 +48,12 @@ export class JwtTokenServiceAdapter implements TokenService {
   getRefreshTokenExpiry(): Date {
     return new Date(Date.now() + parseDurationMs(this.cfg.refreshExpiresIn));
   }
+}
+
+/** Bare numeric strings mean seconds here; jsonwebtoken would read them as milliseconds. */
+function toExpiresIn(input: string): SignOptions['expiresIn'] {
+  const trimmed = input.trim();
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : (trimmed as SignOptions['expiresIn']);
 }
 
 function parseDurationMs(input: string): number {
