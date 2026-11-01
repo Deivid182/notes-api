@@ -14,7 +14,8 @@ export function createAuthRouter(container: Container): Router {
 
   router.post('/register', validateRequest(registerSchema), controller.register);
   router.post('/login', validateRequest(loginSchema), controller.login);
-  router.post('/refresh', authMiddleware, validateRequest(refreshSchema), controller.refresh);
+  // /refresh es público: el access token ya puede estar vencido; la autoridad es el refresh token.
+  router.post('/refresh', validateRequest(refreshSchema), controller.refresh);
   router.post('/logout', authMiddleware, validateRequest(logoutSchema), controller.logout);
 
   return router;
