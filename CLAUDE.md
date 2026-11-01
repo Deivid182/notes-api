@@ -11,6 +11,7 @@ pnpm, Node >=24 (uses `node:sqlite`), ESM TypeScript (`NodeNext`).
 - `pnpm lint` / `pnpm lint:fix`, `pnpm typecheck`, `pnpm format`
 - `pnpm test:unit` (`src/**/*.spec.ts`), `pnpm test:integration` (`tests/integration`, empty), `pnpm test:e2e` (`tests/e2e`)
 - Single test: `pnpm vitest run --project unit path/to/file.spec.ts` (add `-t "name"` to filter)
+- `pnpm migrate` (or `migrate:sqlite|postgres|mongodb`) — `src/migrate.ts` CLI, applies pending migrations for `DATABASE_ENGINE` (or the engine arg) and exits
 - `make docker-up` / `docker-down` — compose stack
 - Husky: pre-commit = lint-staged; pre-push = typecheck + lint + unit tests; commit-msg = commitlint (conventional commits).
 - JWT `*_EXPIRES_IN` bare numbers = seconds (adapter converts; jsonwebtoken would read ms).
@@ -33,7 +34,8 @@ Modular monolith, hexagonal/DDD-style. Modules under `src/modules/`: `users`, `a
 
 - Path aliases `#modules/<auth|users|notes|shared>/*` (tsconfig `paths`, package.json `imports` → `dist`, vitest alias). Relative imports within a module use `.js` extensions.
 - `tests/tsconfig.json` is the TS project for tests (`moduleResolution: Bundler`, includes `src/`). Root `tsconfig.json` only covers `src/`; under NodeNext its `paths` fall back to `dist/`, so don't typecheck tests with it.
-- Migration `.sql` files are read from `__dirname` at runtime; `tsc` does not copy them to `dist/`, so `pnpm start` with `RUN_MIGRATIONS=true` will not find them.
+- Alias imports (`#modules/...`) must NOT end in `.js` (lint-enforced): `package.json` `imports` appends it, so `x.js` works in dev but becomes `x.js.js` in `dist`.
+- Build = `tsc` + `scripts/copy-assets.mjs` (copies migration `.sql` files to `dist/`; they're read from `__dirname` at runtime). Production image: `docker/entrypoint.sh` runs `node dist/migrate.js` if `RUN_MIGRATIONS` is true/1, then starts `dist/main.js` with `RUN_MIGRATIONS=false`.
 - Source comments are largely in Spanish.
 - `data/notes.db*` (SQLite files) is tracked in git.
 - CI (`.github/workflows/ci.yml`) currently runs only lint + typecheck; test jobs are commented out. Coverage thresholds in `vitest.config.ts`: 80% lines/functions/statements, 70% branches.

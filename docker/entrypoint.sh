@@ -1,12 +1,10 @@
 #!/bin/sh
 set -e
 
-if [ "$RUN_MIGRATIONS" = "true" ]; then
-  case "$DATABASE_ENGINE" in
-    postgres) echo "→ running postgres migrations"; node dist/infrastructure/persistence/postgres/migrate.js ;;
-    sqlite)   echo "→ running sqlite migrations";   node dist/infrastructure/persistence/sqlite/migrate.js ;;
-    mongodb)  echo "→ running mongo indexes";       node dist/infrastructure/persistence/mongodb/migrate.js ;;
-  esac
+if [ "$RUN_MIGRATIONS" = "true" ] || [ "$RUN_MIGRATIONS" = "1" ]; then
+  echo "→ running ${DATABASE_ENGINE:-sqlite} migrations"
+  node dist/migrate.js
 fi
 
-exec node dist/main.js
+# Las migraciones ya se aplicaron arriba: la app no las repite al arrancar.
+RUN_MIGRATIONS=false exec node dist/main.js
