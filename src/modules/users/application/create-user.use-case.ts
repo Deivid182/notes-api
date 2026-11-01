@@ -2,6 +2,7 @@ import { ConflictError } from '#modules/shared/domain/error';
 import { newUuid } from '#modules/shared/domain/uuid';
 import { Email } from '#modules/shared/domain/value-objects/email.vo';
 
+import { Password } from '../domain/password.vo.js';
 import { Role } from '../domain/role.vo.js';
 import { User } from '../domain/user.entity.js';
 
@@ -27,10 +28,11 @@ export class CreateUserUseCase {
 
   async execute(input: CreateUserInput): Promise<User> {
     const email = Email.create(input.email);
+    const password = Password.create(input.password);
     const existing = await this.deps.userRepository.findByEmail(email.toString());
     if (existing) throw new ConflictError('Email already registered');
 
-    const passwordHash = await this.deps.passwordHasher.hash(input.password);
+    const passwordHash = await this.deps.passwordHasher.hash(password.reveal());
     const role = input.role
       ? Role.create(input.role)
       : Role.create(this.deps.defaultRole ?? 'user');

@@ -85,6 +85,26 @@ describe('users HTTP e2e', () => {
   });
 });
 
+describe('password policy e2e', () => {
+  it('enforces the same Password rule on register and admin-created users', async () => {
+    const short = await request(t.app)
+      .post('/api/v1/auth/register')
+      .send({ email: 'pw1@test.com', password: '1234567' });
+    expect(short.status).toBe(400);
+    expect(short.body.error.message).toMatch(/at least 8/);
+
+    const tooLong = await request(t.app)
+      .post('/api/v1/auth/register')
+      .send({ email: 'pw2@test.com', password: 'a'.repeat(73) });
+    expect(tooLong.status).toBe(400);
+
+    const login = await request(t.app)
+      .post('/api/v1/auth/login')
+      .send({ email: 'nobody@test.com', password: 'x' });
+    expect(login.status).toBe(401); // login no aplica la política: credenciales inválidas, no 400
+  });
+});
+
 describe('auth refresh e2e', () => {
   it('refreshes without an access token (it may already be expired)', async () => {
     const reg = await request(t.app)

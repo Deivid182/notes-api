@@ -1,13 +1,15 @@
 import { z } from 'zod';
 
+// La política de contraseña vive en el VO `Password` (dominio). Login no la aplica:
+// solo compara contra el hash, para no bloquear cuentas creadas con reglas anteriores.
 export const registerSchema = z.object({
   email: z.email(),
-  password: z.string().min(8).max(72),
+  password: z.string(),
 });
 
 export const loginSchema = z.object({
   email: z.email(),
-  password: z.string().min(8).max(72),
+  password: z.string().min(1),
 });
 
 export const refreshSchema = z.object({

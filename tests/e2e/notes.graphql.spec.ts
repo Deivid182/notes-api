@@ -72,4 +72,12 @@ describe('notes GraphQL e2e', () => {
     expect((await gql(t.yoga, create)).errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
     expect((await gql(t.yoga, create, alice)).errors?.[0]?.extensions.code).toBe('FORBIDDEN');
   });
+
+  it('applies the password policy to GraphQL register too', async () => {
+    const r = await gql(
+      t.yoga,
+      'mutation { register(email: "pw@test.com", password: "short") { accessToken } }',
+    );
+    expect(r.errors?.[0]?.extensions.code).toBe('BAD_USER_INPUT');
+  });
 });
