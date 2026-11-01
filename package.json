@@ -25,9 +25,9 @@
     "test:e2e": "vitest run --project e2e",
     "test": "vitest run",
     "test:watch": "vitest --project unit",
-    "migrate:sqlite": "tsx src/core/infrastructure/persistence/sqlite/migrate.ts",
-    "migrate:postgres": "tsx src/core/infrastructure/persistence/postgres/migrate.ts",
-    "migrate:mongodb": "tsx src/core/infrastructure/persistence/mongodb/migrate.ts"
+    "migrate:sqlite": "tsx src/modules/shared/infrastructure/persistence/sqlite/migrate.ts",
+    "migrate:postgres": "tsx src/modules/shared/infrastructure/persistence/postgres/migrate.ts",
+    "migrate:mongodb": "tsx src/modules/shared/infrastructure/persistence/mongodb/migrate.ts"
   },
   "keywords": [],
   "author": "",
