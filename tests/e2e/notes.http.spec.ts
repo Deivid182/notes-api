@@ -3,8 +3,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp } from './helpers.js';
 
+const t = await buildTestApp();
+afterAll(() => t.close());
+
 describe('notes HTTP e2e', () => {
-  const t = buildTestApp();
   let alice = '';
   let bob = '';
   let admin = '';
@@ -32,7 +34,6 @@ describe('notes HTTP e2e', () => {
       .send({ email: 'admin@test.com', password: 'secret123' });
     admin = login.body.data.accessToken;
   });
-  afterAll(() => t.close());
 
   const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 

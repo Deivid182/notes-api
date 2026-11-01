@@ -12,7 +12,7 @@ import { createNotFoundHandler } from './middlewares/not-found.middleware.js';
 // import { createNotesRouter } from '../../modules/notes/presentation/http/notes.router.js';
 // import { createErrorHandler, createNotFoundHandler } from './middlewares/error-handler.js';
 
-export function createHttpServer(container: Container): Express {
+export function createHttpApp(container: Container): Express {
   const app = express();
 
   // --- Global middlewares ---

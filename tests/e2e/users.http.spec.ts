@@ -3,8 +3,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp } from './helpers.js';
 
+const t = await buildTestApp();
+afterAll(() => t.close());
+
 describe('users HTTP e2e', () => {
-  const t = buildTestApp();
   let alice = { id: '', token: '', refresh: '' };
   let bob = { id: '', token: '' };
   let admin = { id: '', token: '' };
@@ -34,7 +36,6 @@ describe('users HTTP e2e', () => {
       .send({ email: 'admin@test.com', password: 'secret123' });
     admin = { id: created.id, token: login.body.data.accessToken };
   });
-  afterAll(() => t.close());
 
   it('requires authentication on every users route', async () => {
     const body = { email: 'x@test.com', password: 'secret123', role: 'admin' };
@@ -85,9 +86,6 @@ describe('users HTTP e2e', () => {
 });
 
 describe('auth refresh e2e', () => {
-  const t = buildTestApp();
-  afterAll(() => t.close());
-
   it('refreshes without an access token (it may already be expired)', async () => {
     const reg = await request(t.app)
       .post('/api/v1/auth/register')

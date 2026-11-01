@@ -2,8 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp, gql } from './helpers.js';
 
+const t = await buildTestApp();
+afterAll(() => t.close());
+
 describe('notes GraphQL e2e', () => {
-  const t = buildTestApp();
   let alice = '';
   let bob = '';
 
@@ -18,7 +20,6 @@ describe('notes GraphQL e2e', () => {
     alice = await reg('alice@test.com');
     bob = await reg('bob@test.com');
   });
-  afterAll(() => t.close());
 
   it('requires authentication', async () => {
     const r = await gql(t.yoga, '{ notes { id } }');

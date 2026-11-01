@@ -1,36 +1,22 @@
-import { createYoga } from 'graphql-yoga';
+import { parseEnv } from '#modules/shared/infrastructure/config/env';
 
-import {
-  buildContainer,
-  buildSharedContext,
-} from '#modules/shared/infrastructure/config/container';
-import { loadEnv } from '#modules/shared/infrastructure/config/env';
-import { connectSqlite } from '#modules/shared/infrastructure/persistence/sqlite/connection';
-import { runSqliteMigrations } from '#modules/shared/infrastructure/persistence/sqlite/migrate';
-import { buildContext, type GraphQLContext } from '#modules/shared/presentation/graphql/context';
-import { schema } from '#modules/shared/presentation/graphql/schema';
-import { createHttpServer } from '#modules/shared/presentation/http/v1/index';
+import { createApp } from '../../src/app.js';
 
-export function buildTestApp() {
-  const env = loadEnv();
-  const db = connectSqlite(':memory:');
-  const shared = buildSharedContext({
-    env,
-    persistence: { sqlite: db },
-    logger: { debug() {}, info() {}, warn() {}, error() {} },
-  });
-  runSqliteMigrations(db, shared.logger);
-  const container = buildContainer({ shared });
-  const app = createHttpServer(container);
-  const yoga = createYoga<object, GraphQLContext>({
-    schema,
-    context: ({ request }: { request: Request }) => buildContext({ container }, request),
-  });
-  return { app, yoga, container, close: () => db.close() };
+const silentLogger = { debug() {}, info() {}, warn() {}, error() {} };
+
+/** Misma composición que producción (`createApp`), sobre SQLite en memoria y sin abrir puertos. */
+export async function buildTestApp() {
+  const app = await createApp(parseEnv(process.env), { logger: silentLogger });
+  return {
+    app: app.http,
+    yoga: app.graphql.yoga,
+    container: app.container,
+    close: () => app.stop(),
+  };
 }
 
 export async function gql(
-  yoga: ReturnType<typeof buildTestApp>['yoga'],
+  yoga: Awaited<ReturnType<typeof buildTestApp>>['yoga'],
   query: string,
   token?: string,
 ) {

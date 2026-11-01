@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// `z.coerce.boolean()` convertiría la cadena "false" en true.
+const booleanFlag = z
+  .enum(['true', 'false', '1', '0'])
+  .default('false')
+  .transform((v) => v === 'true' || v === '1');
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT_HTTP: z.coerce.number().default(3000),
@@ -14,16 +20,20 @@ const schema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('604800'),
   DEFAULT_USER_ROLE: z.string().default('user'),
 
-  RUN_MIGRATIONS: z.coerce.boolean().default(false),
+  RUN_MIGRATIONS: booleanFlag,
 });
 
 export type Env = z.infer<typeof schema>;
 
-export function loadEnv(): Env {
-  const parsed = schema.safeParse(process.env);
+export function parseEnv(raw: NodeJS.ProcessEnv): Env {
+  const parsed = schema.safeParse(raw);
   if (!parsed.success) {
-    console.error('Invalid environment configuration:', parsed.error.flatten().fieldErrors);
-    process.exit(1);
+    const details = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    throw new Error(`Invalid environment configuration: ${details}`);
   }
   return parsed.data;
+}
+
+export function loadEnv(): Env {
+  return parseEnv(process.env);
 }
