@@ -1,4 +1,3 @@
-// import { type MongoClient, type Db } from 'mongodb';
 import 'dotenv/config';
 import { type DatabaseSync } from 'node:sqlite';
 
@@ -11,19 +10,13 @@ import {
   type Persistence,
 } from './modules/shared/infrastructure/config/container.js';
 import { loadEnv, type Env } from './modules/shared/infrastructure/config/env.js';
+import { connectMongo } from './modules/shared/infrastructure/persistence/mongodb/connection.js';
+import { runMongoMigrations } from './modules/shared/infrastructure/persistence/mongodb/migrate.js';
+import { connectPostgres } from './modules/shared/infrastructure/persistence/postgres/connection.js';
+import { runPostgresMigrations } from './modules/shared/infrastructure/persistence/postgres/migrate.js';
 import { connectSqlite } from './modules/shared/infrastructure/persistence/sqlite/connection.js';
 import { runSqliteMigrations } from './modules/shared/infrastructure/persistence/sqlite/migrate.js';
 import { createHttpServer } from './modules/shared/presentation/http/v1/index.js';
-
-// import { ConsoleLogger } from './modules/shared/infrastructure/adapters/console-logger.adapter.js';
-
-// import type { DatabaseSync } from 'node:sqlite';
-// import type { Pool } from 'pg';
-
-// import { connectMongo } from './infrastructure/persistence/mongodb/connection.js';
-// import { runMongoMigrations } from './infrastructure/persistence/mongodb/migrate.js';
-// import { connectPostgres } from './infrastructure/persistence/postgres/connection.js';
-// import { runPostgresMigrations } from './infrastructure/persistence/postgres/migrate.js';
 
 interface BootstrapResult {
   persistence: Persistence;
@@ -41,48 +34,26 @@ async function bootstrapPersistence(env: Env, logger: ConsoleLogger): Promise<Bo
           db.close();
         },
       };
-      // return {
-      //   persistence: { sqlite: undefined },
-      //   shutdown: async () => {
-      //     logger.info('SQLite persistence shutdown (no-op)');
-      //   },
-      // };
     }
 
     case 'postgres': {
-      // const pool: Pool = connectPostgres(env.DATABASE_URL);
-      // if (env.RUN_MIGRATIONS) await runPostgresMigrations(pool, logger);
-      // return {
-      //   persistence: { postgres: pool },
-      //   shutdown: async () => {
-      //     await pool.end();
-      //   },
-      // };
-
+      const pool = connectPostgres(env.DATABASE_URL);
+      if (env.RUN_MIGRATIONS) await runPostgresMigrations(pool, logger);
       return {
-        persistence: { postgres: undefined },
+        persistence: { postgres: pool },
         shutdown: async () => {
-          logger.info('Postgres persistence shutdown (no-op)');
+          await pool.end();
         },
       };
     }
 
     case 'mongodb': {
-      // const { client, db }: { client: MongoClient; db: Db } = await connectMongo(
-      //   env.DATABASE_URL,
-      //   env.DATABASE_NAME,
-      // );
-      // if (env.RUN_MIGRATIONS) await runMongoMigrations(db, logger);
-      // return {
-      //   persistence: { mongodb: db },
-      //   shutdown: async () => {
-      //     await client.close();
-      //   },
-      // };
+      const { client, db } = await connectMongo(env.DATABASE_URL, env.DATABASE_NAME);
+      if (env.RUN_MIGRATIONS) await runMongoMigrations(db, logger);
       return {
-        persistence: { mongodb: undefined },
+        persistence: { mongodb: db },
         shutdown: async () => {
-          logger.info('MongoDB persistence shutdown (no-op)');
+          await client.close();
         },
       };
     }
