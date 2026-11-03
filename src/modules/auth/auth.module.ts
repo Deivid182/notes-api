@@ -15,6 +15,7 @@ import { SqliteRefreshTokenRepositoryImpl } from './infrastructure/persistence/s
 
 export interface AuthModule {
   tokenService: TokenService;
+  refreshTokenRepository: RefreshTokenRepository;
   useCases: {
     registerUser: RegisterUserUseCase;
     login: LoginUseCase;
@@ -58,6 +59,7 @@ export function createAuthModule({ shared, users }: CreateAuthModuleDeps): AuthM
 
   return {
     tokenService,
+    refreshTokenRepository,
     useCases: { registerUser, login, refreshToken, logout },
   };
 }
