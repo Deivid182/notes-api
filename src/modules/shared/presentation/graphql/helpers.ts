@@ -6,18 +6,10 @@ import type { Logger } from '#modules/shared/domain/interfaces/logger.interface'
 import type { AuthUser, GraphQLContext } from './context.js';
 import type { MaskError } from 'graphql-yoga';
 
-const CODE_MAP: Record<string, string> = {
-  VALIDATION_ERROR: 'BAD_USER_INPUT',
-  UNAUTHORIZED: 'UNAUTHENTICATED',
-  FORBIDDEN: 'FORBIDDEN',
-  NOT_FOUND: 'NOT_FOUND',
-  CONFLICT: 'CONFLICT',
-};
-
 export function requireUser(ctx: GraphQLContext): AuthUser {
   if (!ctx.user) {
     throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' },
+      extensions: { code: 'UNAUTHORIZED' },
     });
   }
   return ctx.user;
@@ -33,7 +25,7 @@ export function requireAdmin(ctx: GraphQLContext): AuthUser {
 
 /**
  * `maskError` de Yoga: único punto donde un `DomainError` se traduce a `GraphQLError`.
- * Los resolvers solo lanzan; lo inesperado se registra y se oculta al cliente.
+ * El `extensions.code` es el mismo `DomainError.code` que usa HTTP (`error.code`). Los resolvers solo lanzan; lo inesperado se registra y se oculta al cliente.
  */
 export function createMaskError(logger: Logger): MaskError {
   return (error) => {
@@ -45,7 +37,7 @@ export function createMaskError(logger: Logger): MaskError {
       return new GraphQLError(original.message, {
         ...position,
         originalError: original,
-        extensions: { code: CODE_MAP[original.code] ?? 'INTERNAL_SERVER_ERROR' },
+        extensions: { code: original.code },
       });
     }
 
@@ -58,7 +50,7 @@ export function createMaskError(logger: Logger): MaskError {
     });
     return new GraphQLError('Internal server error', {
       ...position,
-      extensions: { code: 'INTERNAL_SERVER_ERROR' },
+      extensions: { code: 'INTERNAL_ERROR' },
     });
   };
 }

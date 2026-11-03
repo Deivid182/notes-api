@@ -164,7 +164,7 @@ describe('auth logout e2e', () => {
       .post('/api/v1/auth/logout')
       .set('Authorization', 'Bearer not-a-valid-token')
       .send({ refreshToken });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(204);
     expect((await refresh(refreshToken)).status).toBe(401);
   });
 
@@ -178,7 +178,7 @@ describe('auth logout e2e', () => {
     const res = await request(t.app)
       .post('/api/v1/auth/logout')
       .send({ refreshToken: first.refreshToken, all: true });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(204);
     expect((await refresh(first.refreshToken)).status).toBe(401);
     expect((await refresh(second)).status).toBe(401);
   });
@@ -196,6 +196,6 @@ describe('auth logout e2e', () => {
   });
 
   it('is a harmless no-op with no credentials', async () => {
-    expect((await request(t.app).post('/api/v1/auth/logout').send({})).status).toBe(200);
+    expect((await request(t.app).post('/api/v1/auth/logout').send({})).status).toBe(204);
   });
 });

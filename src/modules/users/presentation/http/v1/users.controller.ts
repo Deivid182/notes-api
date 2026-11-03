@@ -1,4 +1,5 @@
 import { actorOf } from '#modules/shared/presentation/http/v1/actor';
+import { sendData } from '#modules/shared/presentation/http/v1/response';
 
 import { mapUser } from '../../mappers/user.mapper.js';
 
@@ -12,7 +13,7 @@ export class UsersController {
   createUser = async (req: Request, res: Response) => {
     const { email, password, role } = req.body as CreateUserBody;
     const user = await this.useCases.createUser.execute({ email, password, role });
-    res.status(201).json({ data: mapUser(user) });
+    sendData(res, mapUser(user), 201);
   };
 
   getUser = async (req: Request, res: Response) => {
@@ -20,7 +21,7 @@ export class UsersController {
       actor: actorOf(req),
       userId: req.params.id as string,
     });
-    res.status(200).json({ data: mapUser(user) });
+    sendData(res, mapUser(user));
   };
 
   assignRole = async (req: Request, res: Response) => {
@@ -30,6 +31,6 @@ export class UsersController {
       userId: req.params.id as string,
       role,
     });
-    res.status(200).json({ data: mapUser(user) });
+    sendData(res, mapUser(user));
   };
 }

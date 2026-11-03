@@ -23,14 +23,14 @@ describe('notes GraphQL e2e', () => {
 
   it('requires authentication', async () => {
     const r = await gql(t.yoga, '{ notes { hasMore } }');
-    expect(r.errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+    expect(r.errors?.[0]?.extensions.code).toBe('UNAUTHORIZED');
   });
 
   it('me returns the current user', async () => {
     const r = await gql(t.yoga, '{ me { email role } }', alice);
     expect(r.data.me).toEqual({ email: 'alice@test.com', role: 'user' });
     const anon = await gql(t.yoga, '{ me { email } }');
-    expect(anon.errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+    expect(anon.errors?.[0]?.extensions.code).toBe('UNAUTHORIZED');
   });
 
   it('runs create/read/update/delete and enforces ownership', async () => {
@@ -59,7 +59,7 @@ describe('notes GraphQL e2e', () => {
     const aliceId = (me.data.me as { id: string }).id;
 
     const anonGet = await gql(t.yoga, `{ getUser(id: "${aliceId}") { id } }`);
-    expect(anonGet.errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+    expect(anonGet.errors?.[0]?.extensions.code).toBe('UNAUTHORIZED');
 
     const otherGet = await gql(t.yoga, `{ getUser(id: "${aliceId}") { id } }`, bob);
     expect(otherGet.errors?.[0]?.extensions.code).toBe('FORBIDDEN');
@@ -69,7 +69,7 @@ describe('notes GraphQL e2e', () => {
 
     const create =
       'mutation { createUser(email: "n@test.com", password: "secret123", role: "admin") { role } }';
-    expect((await gql(t.yoga, create)).errors?.[0]?.extensions.code).toBe('UNAUTHENTICATED');
+    expect((await gql(t.yoga, create)).errors?.[0]?.extensions.code).toBe('UNAUTHORIZED');
     expect((await gql(t.yoga, create, alice)).errors?.[0]?.extensions.code).toBe('FORBIDDEN');
   });
 
@@ -78,7 +78,7 @@ describe('notes GraphQL e2e', () => {
       t.yoga,
       'mutation { register(email: "pw@test.com", password: "short") { accessToken } }',
     );
-    expect(r.errors?.[0]?.extensions.code).toBe('BAD_USER_INPUT');
+    expect(r.errors?.[0]?.extensions.code).toBe('VALIDATION_ERROR');
   });
 
   it('paginates notes', async () => {
@@ -100,6 +100,6 @@ describe('notes GraphQL e2e', () => {
     expect(notes).toMatchObject({ limit: 2, hasMore: true });
 
     const bad = await gql(t.yoga, '{ notes(limit: 500) { hasMore } }', token);
-    expect(bad.errors?.[0]?.extensions.code).toBe('BAD_USER_INPUT');
+    expect(bad.errors?.[0]?.extensions.code).toBe('VALIDATION_ERROR');
   });
 });

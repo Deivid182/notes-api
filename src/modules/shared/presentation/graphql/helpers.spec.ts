@@ -15,7 +15,7 @@ const mask = createMaskError(logger);
 
 describe('createMaskError', () => {
   it.each([
-    [new ValidationError('bad'), 'BAD_USER_INPUT'],
+    [new ValidationError('bad'), 'VALIDATION_ERROR'],
     [new ForbiddenError('no'), 'FORBIDDEN'],
     [new NotFoundError('missing'), 'NOT_FOUND'],
     [new ConflictError('dup'), 'CONFLICT'],
@@ -38,18 +38,18 @@ describe('createMaskError', () => {
 
   it('passes through GraphQLErrors that already carry a code', () => {
     const own = new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' },
+      extensions: { code: 'UNAUTHORIZED' },
     });
     const located = new GraphQLError('x', { path: ['me'], originalError: own });
     const masked = mask(located, 'ignored') as GraphQLError;
-    expect(masked.extensions.code).toBe('UNAUTHENTICATED');
+    expect(masked.extensions.code).toBe('UNAUTHORIZED');
     expect(masked.path).toEqual(['me']);
   });
 
   it('hides and logs unexpected errors', () => {
     const masked = mask(new Error('db password leaked'), 'ignored') as GraphQLError;
     expect(masked.message).toBe('Internal server error');
-    expect(masked.extensions.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(masked.extensions.code).toBe('INTERNAL_ERROR');
     expect(logger.error).toHaveBeenCalledWith(
       'Unhandled GraphQL error',
       expect.objectContaining({ message: 'db password leaked' }),

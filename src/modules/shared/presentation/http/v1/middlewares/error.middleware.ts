@@ -3,6 +3,8 @@ import { ZodError } from 'zod';
 import { DomainError } from '#modules/shared/domain/error';
 import { type Logger } from '#modules/shared/domain/interfaces/logger.interface';
 
+import { sendError } from '../response.js';
+
 import type { ErrorRequestHandler } from 'express';
 
 const STATUS_MAP: Record<string, number> = {
@@ -24,22 +26,14 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
         path: req.path,
         method: req.method,
       });
-      res.status(status).json({
-        error: { code: err.code, message: err.message },
-      });
+      sendError(res, status, err.code, err.message);
       return;
     }
 
     // Zod filtrado (por si algún schema se cuela sin pasar por validateBody)
     if (err instanceof ZodError) {
       logger.warn('Zod error leaked to error handler', { path: req.path });
-      res.status(400).json({
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid input',
-          details: err.issues,
-        },
-      });
+      sendError(res, 400, 'VALIDATION_ERROR', 'Invalid input', err.issues);
       return;
     }
 
@@ -50,8 +44,6 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
     });
-    res.status(500).json({
-      error: { code: 'INTERNAL_ERROR', message: 'Internal server error' },
-    });
+    sendError(res, 500, 'INTERNAL_ERROR', 'Internal server error');
   };
 }

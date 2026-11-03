@@ -1,4 +1,5 @@
 import { UnauthorizedError } from '#modules/shared/domain/error';
+import { sendData, sendNoContent } from '#modules/shared/presentation/http/v1/response';
 
 import { mapAuthPayload } from '../../mappers/auth.mapper.js';
 
@@ -18,16 +19,14 @@ export class AuthController {
     const { email, password } = req.body as RegisterBody;
     const result = await this.useCases.registerUser.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    res
-      .status(201)
-      .json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    sendData(res, mapAuthPayload(result.user, result.accessToken, result.refreshToken), 201);
   };
 
   login = async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginBody;
     const result = await this.useCases.login.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    res.json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    sendData(res, mapAuthPayload(result.user, result.accessToken, result.refreshToken));
   };
 
   refresh = async (req: Request, res: Response) => {
@@ -37,7 +36,7 @@ export class AuthController {
 
     const result = await this.useCases.refreshToken.execute({ refreshToken });
     this.setRefreshCookie(res, result.refreshToken);
-    res.json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    sendData(res, mapAuthPayload(result.user, result.accessToken, result.refreshToken));
   };
 
   logout = async (req: Request, res: Response) => {
@@ -49,7 +48,7 @@ export class AuthController {
       all: body.all,
     });
     res.clearCookie(REFRESH_COOKIE, { path: '/' });
-    res.json({ data: { success: true } });
+    sendNoContent(res);
   };
 
   private setRefreshCookie(res: Response, token: string) {

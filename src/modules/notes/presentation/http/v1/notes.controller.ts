@@ -1,4 +1,5 @@
 import { actorOf } from '#modules/shared/presentation/http/v1/actor';
+import { sendData, sendList, sendNoContent } from '#modules/shared/presentation/http/v1/response';
 
 import { mapNote, mapNotePage } from '../../mappers/note.mapper.js';
 
@@ -13,14 +14,14 @@ export class NotesController {
   create = async (req: Request, res: Response) => {
     const { title, content } = req.body as CreateNoteBody;
     const note = await this.useCases.createNote.execute({ actor: actorOf(req), title, content });
-    res.status(201).json({ data: mapNote(note) });
+    sendData(res, mapNote(note), 201);
   };
 
   list = async (req: Request, res: Response) => {
     const { limit, offset } = req.query as ListNotesQuery;
     const page = await this.useCases.listNotes.execute({ actor: actorOf(req), limit, offset });
     const { items, ...meta } = mapNotePage(page);
-    res.status(200).json({ data: items, meta });
+    sendList(res, items, meta);
   };
 
   get = async (req: Request, res: Response) => {
@@ -28,7 +29,7 @@ export class NotesController {
       actor: actorOf(req),
       noteId: req.params.id as string,
     });
-    res.status(200).json({ data: mapNote(note) });
+    sendData(res, mapNote(note));
   };
 
   update = async (req: Request, res: Response) => {
@@ -39,7 +40,7 @@ export class NotesController {
       title,
       content,
     });
-    res.status(200).json({ data: mapNote(note) });
+    sendData(res, mapNote(note));
   };
 
   delete = async (req: Request, res: Response) => {
@@ -47,6 +48,6 @@ export class NotesController {
       actor: actorOf(req),
       noteId: req.params.id as string,
     });
-    res.status(204).send();
+    sendNoContent(res);
   };
 }
