@@ -24,13 +24,14 @@ export function sendNoContent(res: Response): void {
   res.status(204).send();
 }
 
-export function sendError(
-  res: Response,
-  status: number,
-  code: string,
-  message: string,
-  details?: unknown,
-): void {
+export interface ErrorResponse {
+  status: number;
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+export function sendError(res: Response, { status, code, message, details }: ErrorResponse): void {
   const error: ApiErrorBody['error'] = { code, message };
   if (details !== undefined) error.details = details;
   res.status(status).json({ error } satisfies ApiErrorBody);

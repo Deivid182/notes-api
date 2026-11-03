@@ -26,14 +26,19 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
         path: req.path,
         method: req.method,
       });
-      sendError(res, status, err.code, err.message);
+      sendError(res, { status, code: err.code, message: err.message });
       return;
     }
 
     // Zod filtrado (por si algún schema se cuela sin pasar por validateBody)
     if (err instanceof ZodError) {
       logger.warn('Zod error leaked to error handler', { path: req.path });
-      sendError(res, 400, 'VALIDATION_ERROR', 'Invalid input', err.issues);
+      sendError(res, {
+        status: 400,
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid input',
+        details: err.issues,
+      });
       return;
     }
 
@@ -44,6 +49,6 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
     });
-    sendError(res, 500, 'INTERNAL_ERROR', 'Internal server error');
+    sendError(res, { status: 500, code: 'INTERNAL_ERROR', message: 'Internal server error' });
   };
 }

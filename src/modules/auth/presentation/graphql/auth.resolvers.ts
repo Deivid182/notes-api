@@ -23,15 +23,15 @@ export const authResolvers = {
       ctx: GraphQLContext,
     ) => {
       const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r);
     },
     login: async (_: unknown, args: { email: string; password: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.login.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r);
     },
     refreshToken: async (_: unknown, args: { refreshToken: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r);
     },
     logout: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const user = requireUser(ctx);
