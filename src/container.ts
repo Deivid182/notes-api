@@ -4,8 +4,9 @@ import { createUsersModule, type UsersModule } from '#modules/users/users.module
 
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';
-import type { Env } from './env.js';
-import type { Persistence, SharedContext } from './shared-context.js';
+import type { Env } from '#modules/shared/infrastructure/config/env';
+import type { Persistence } from '#modules/shared/infrastructure/persistence/persistence';
+import type { SharedContext } from '#modules/shared/infrastructure/shared-context';
 
 /**
  * Resultado del composition root. Los casos de uso y servicios de cada módulo se
@@ -43,7 +44,3 @@ export function buildContainer({ shared }: BuildContainerOptions): Container {
     modules: { users, auth, notes },
   };
 }
-
-// Re-exports para el composition root de `main.ts`.
-export { buildSharedContext } from './shared-context.js';
-export type { SharedContext, Persistence } from './shared-context.js';

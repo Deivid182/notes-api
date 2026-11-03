@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import { ConsoleLogger } from '#modules/shared/infrastructure/adapters/console-logger.adapter';
 
-import { loadEnv, type Env } from './modules/shared/infrastructure/config/env.js';
+import { parseEnv, type Env } from './modules/shared/infrastructure/config/env.js';
 import { bootstrapPersistence } from './modules/shared/infrastructure/persistence/bootstrap.js';
 
 const ENGINES: Array<Env['DATABASE_ENGINE']> = ['sqlite', 'postgres', 'mongodb'];
@@ -17,12 +17,12 @@ async function main(): Promise<void> {
     throw new Error(`Unknown engine "${arg}". Use one of: ${ENGINES.join(', ')}`);
   }
 
-  const base = loadEnv();
-  const env: Env = {
-    ...base,
-    DATABASE_ENGINE: (arg as Env['DATABASE_ENGINE'] | undefined) ?? base.DATABASE_ENGINE,
-    RUN_MIGRATIONS: true,
-  };
+  // Se re-valida el entorno con el motor elegido: así `DATABASE_URL` se exige para ese motor.
+  const env = parseEnv({
+    ...process.env,
+    ...(arg ? { DATABASE_ENGINE: arg } : {}),
+    RUN_MIGRATIONS: 'true',
+  });
 
   const logger = new ConsoleLogger();
   logger.info('Running migrations', { engine: env.DATABASE_ENGINE });

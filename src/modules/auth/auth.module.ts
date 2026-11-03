@@ -1,4 +1,4 @@
-import { type SharedContext } from '#modules/shared/infrastructure/config/shared-context';
+import { type SharedContext } from '#modules/shared/infrastructure/shared-context';
 import { type UsersModule } from '#modules/users/users.module';
 
 import { LoginUseCase } from './application/login.use-case.js';

@@ -10,7 +10,7 @@ const silent = { debug() {}, info() {}, warn() {}, error() {} };
 describe('SqliteNoteRepositoryImpl rehydration', () => {
   it('loads stored rows even if they no longer satisfy current VO rules', async () => {
     const db = connectSqlite(':memory:');
-    runSqliteMigrations(db, silent);
+    await runSqliteMigrations(db, silent);
     const now = new Date().toISOString();
     db.prepare(
       `INSERT INTO users (id, email, password_hash, role, created_at, updated_at)
@@ -31,7 +31,7 @@ describe('SqliteNoteRepositoryImpl rehydration', () => {
 
   it('returns a stable, newest-first window per owner', async () => {
     const db = connectSqlite(':memory:');
-    runSqliteMigrations(db, silent);
+    await runSqliteMigrations(db, silent);
     const stamp = (i: number) => new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString();
     for (const u of ['u1', 'u2']) {
       db.prepare(

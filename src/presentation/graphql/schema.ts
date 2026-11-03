@@ -1,15 +1,12 @@
-// import { notesResolvers } from '../../modules/notes/presentation/graphql/notes.resolvers.js';
-// import { notesTypeDefs } from '../../modules/notes/presentation/graphql/notes.typeDefs.js';
 import { createSchema } from 'graphql-yoga';
 
 import { authResolvers } from '#modules/auth/presentation/graphql/auth.resolvers';
 import { authTypeDefs } from '#modules/auth/presentation/graphql/auth.typedefs';
 import { notesResolvers } from '#modules/notes/presentation/graphql/notes.resolvers';
 import { notesTypeDefs } from '#modules/notes/presentation/graphql/notes.typedefs';
+import { sharedTypeDefs } from '#modules/shared/presentation/graphql/typedefs';
 import { usersResolvers } from '#modules/users/presentation/graphql/users.resolvers';
 import { usersTypeDefs } from '#modules/users/presentation/graphql/users.typedefs';
-
-import { sharedTypeDefs } from './typedefs.js';
 
 export const typeDefs = /* GraphQL */ `
   ${sharedTypeDefs}

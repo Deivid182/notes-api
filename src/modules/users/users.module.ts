@@ -1,10 +1,11 @@
 import { type PasswordHasher } from '#modules/shared/domain/interfaces/password-hasher.interface';
 import { BcryptPasswordHasher } from '#modules/shared/infrastructure/adapters/bcrypt-password-hasher.adapter';
-import { type SharedContext } from '#modules/shared/infrastructure/config/shared-context';
+import { type SharedContext } from '#modules/shared/infrastructure/shared-context';
 
 import { AssignRoleUseCase } from './application/assing-role.use-case.js';
 import { CreateUserUseCase } from './application/create-user.use-case.js';
 import { GetUserUseCase } from './application/get-user.use-case.js';
+import { Role } from './domain/role.vo.js';
 import { type UserRepository } from './domain/user.repository.js';
 import { MongoUserRepositoryImpl } from './infrastructure/mongodb/mongodb-user.repository.impl.js';
 import { PostgresUserRepository } from './infrastructure/postgres/postgres.repository.impl.js';
@@ -24,6 +25,9 @@ export interface UsersModule {
 
 export function createUsersModule(shared: SharedContext): UsersModule {
   const { env, persistence, clock } = shared;
+
+  // Falla al arrancar (no en el primer registro) si el rol por defecto no existe.
+  Role.create(env.DEFAULT_USER_ROLE);
 
   const userRepository = buildUserRepository(persistence);
   const passwordHasher = new BcryptPasswordHasher();

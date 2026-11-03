@@ -1,4 +1,4 @@
-import { type SharedContext } from '#modules/shared/infrastructure/config/shared-context';
+import { type SharedContext } from '#modules/shared/infrastructure/shared-context';
 
 import { CreateNoteUseCase } from './application/create-note.use-case.js';
 import { DeleteNoteUseCase } from './application/delete-note.use-case.js';

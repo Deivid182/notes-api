@@ -17,6 +17,7 @@
     "declaration": false,
     "types": ["node"],
     "paths": {
+      "#app/*": ["./src/*"],
       "#modules/auth/*": ["./src/modules/auth/*"],
       "#modules/users/*": ["./src/modules/users/*"],
       "#modules/notes/*": ["./src/modules/notes/*"],

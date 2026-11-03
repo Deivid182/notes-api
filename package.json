@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "imports": {
+    "#app/*": "./dist/*.js",
     "#modules/auth/*": "./dist/modules/auth/*.js",
     "#modules/users/*": "./dist/modules/users/*.js",
     "#modules/notes/*": "./dist/modules/notes/*.js",

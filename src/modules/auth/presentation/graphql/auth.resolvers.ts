@@ -1,4 +1,4 @@
-import { type GraphQLContext } from '#modules/shared/presentation/graphql/context';
+import { type GraphQLContext } from '#app/presentation/graphql/context';
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
 import { gqlResponse } from '#modules/shared/presentation/graphql/response';
 import { mapUser } from '#modules/users/presentation/mappers/user.mapper';

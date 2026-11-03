@@ -1,18 +1,12 @@
 import { type Server } from 'node:http';
 
+import { createGraphQLServer, type GraphQLHandle } from '#app/presentation/graphql/server';
 import { ConsoleLogger } from '#modules/shared/infrastructure/adapters/console-logger.adapter';
-import {
-  createGraphQLServer,
-  type GraphQLHandle,
-} from '#modules/shared/presentation/graphql/server';
 
-import {
-  buildContainer,
-  buildSharedContext,
-  type Container,
-} from './modules/shared/infrastructure/config/container.js';
+import { buildContainer, type Container } from './container.js';
 import { bootstrapPersistence } from './modules/shared/infrastructure/persistence/bootstrap.js';
-import { createHttpApp } from './modules/shared/presentation/http/v1/index.js';
+import { buildSharedContext } from './modules/shared/infrastructure/shared-context.js';
+import { createHttpApp } from './presentation/http/app.js';
 
 import type { Clock } from '#modules/shared/domain/interfaces/clock.interface';
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';

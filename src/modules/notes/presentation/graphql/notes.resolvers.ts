@@ -3,7 +3,7 @@ import { gqlResponse } from '#modules/shared/presentation/graphql/response';
 
 import { mapNote, mapNotePage } from '../mappers/note.mapper.js';
 
-import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
+import type { GraphQLContext } from '#app/presentation/graphql/context';
 
 // Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const notesResolvers = {

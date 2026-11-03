@@ -48,8 +48,8 @@ export default tseslint.config(
         {
           patterns: [
             {
-              regex: '^#modules/.*\\.js$',
-              message: 'Imports con alias #modules no llevan extensión .js.',
+              regex: '^#(modules|app)/.*\\.js$',
+              message: 'Imports con alias #modules/#app no llevan extensión .js.',
             },
           ],
         },

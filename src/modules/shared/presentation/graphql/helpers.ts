@@ -4,11 +4,16 @@ import { DomainError } from '#modules/shared/domain/error';
 
 import { errorExtensions } from './response.js';
 
+import type { Actor } from '#modules/shared/domain/actor';
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';
-import type { AuthUser, GraphQLContext } from './context.js';
 import type { MaskError } from 'graphql-yoga';
 
-export function requireUser(ctx: GraphQLContext): AuthUser {
+/** Subconjunto del contexto GraphQL que necesitan los guards (el contexto completo vive en `src/presentation`). */
+export interface AuthContext {
+  user: Actor | null;
+}
+
+export function requireUser(ctx: AuthContext): Actor {
   if (!ctx.user) {
     throw new GraphQLError('Authentication required', {
       extensions: errorExtensions('UNAUTHORIZED'),
@@ -17,7 +22,7 @@ export function requireUser(ctx: GraphQLContext): AuthUser {
   return ctx.user;
 }
 
-export function requireAdmin(ctx: GraphQLContext): AuthUser {
+export function requireAdmin(ctx: AuthContext): Actor {
   const user = requireUser(ctx);
   if (user.role !== 'admin') {
     throw new GraphQLError('Admin role required', {

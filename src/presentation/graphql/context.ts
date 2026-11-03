@@ -1,22 +1,19 @@
-import type { Container } from '#modules/shared/infrastructure/config/container';
-
-export interface AuthUser {
-  id: string;
-  role: string;
-}
+import type { Container } from '#app/container';
+import type { Actor } from '#modules/shared/domain/actor';
 
 export interface GraphQLContext {
   container: Container;
-  user: AuthUser | null;
+  user: Actor | null;
 }
 
 export interface BuildContextDeps {
   container: Container;
 }
 
+/** `request` es el `Request` estándar de Fetch (el que entrega Yoga), no el de Express. */
 export async function buildContext(
   { container }: BuildContextDeps,
-  request: Request,
+  request: globalThis.Request,
 ): Promise<GraphQLContext> {
   const header = request.headers.get('authorization');
   if (!header || !header.startsWith('Bearer ')) {

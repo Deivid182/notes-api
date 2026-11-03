@@ -1,13 +1,12 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 
+import { type Container } from '#app/container';
 import { createAuthRouter } from '#modules/auth/presentation/http/v1/auth.router';
 import { createNotesRouter } from '#modules/notes/presentation/http/v1/notes.router';
-import { type Container } from '#modules/shared/infrastructure/config/container';
+import { createErrorHandler } from '#modules/shared/presentation/http/v1/middlewares/error.middleware';
+import { createNotFoundHandler } from '#modules/shared/presentation/http/v1/middlewares/not-found.middleware';
 import { createUsersRouter } from '#modules/users/presentation/http/v1/users.router';
-
-import { createErrorHandler } from './middlewares/error.middleware.js';
-import { createNotFoundHandler } from './middlewares/not-found.middleware.js';
 
 export function createHttpApp(container: Container): Express {
   const app = express();

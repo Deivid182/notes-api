@@ -6,8 +6,8 @@ import { connectSqlite } from './sqlite/connection.js';
 import { runSqliteMigrations } from './sqlite/migrate.js';
 
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';
+import type { Persistence } from './persistence.js';
 import type { Env } from '../config/env.js';
-import type { Persistence } from '../config/shared-context.js';
 
 export interface PersistenceHandle {
   persistence: Persistence;
@@ -19,7 +19,7 @@ export async function bootstrapPersistence(env: Env, logger: Logger): Promise<Pe
   switch (env.DATABASE_ENGINE) {
     case 'sqlite': {
       const db = connectSqlite(env.DATABASE_URL);
-      if (env.RUN_MIGRATIONS) runSqliteMigrations(db, logger);
+      if (env.RUN_MIGRATIONS) await runSqliteMigrations(db, logger);
       return {
         persistence: { engine: 'sqlite', sqlite: db },
         shutdown: async () => {
@@ -29,7 +29,10 @@ export async function bootstrapPersistence(env: Env, logger: Logger): Promise<Pe
     }
 
     case 'postgres': {
-      const pool = connectPostgres(env.DATABASE_URL);
+      const pool = connectPostgres(env.DATABASE_URL, logger, {
+        max: env.DATABASE_POOL_MAX,
+        connectionTimeoutMillis: env.DATABASE_CONNECT_TIMEOUT_MS,
+      });
       if (env.RUN_MIGRATIONS) await runPostgresMigrations(pool, logger);
       return {
         persistence: { engine: 'postgres', postgres: pool },

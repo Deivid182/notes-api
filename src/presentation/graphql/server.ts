@@ -2,11 +2,12 @@ import { createServer as createNodeServer, type Server as NodeServer } from 'nod
 
 import { createYoga, type YogaServerInstance } from 'graphql-yoga';
 
+import { createMaskError } from '#modules/shared/presentation/graphql/helpers';
+
 import { buildContext, type GraphQLContext } from './context.js';
-import { createMaskError } from './helpers.js';
 import { schema } from './schema.js';
 
-import type { Container } from '#modules/shared/infrastructure/config/container';
+import type { Container } from '#app/container';
 
 export interface GraphQLHandle {
   yoga: YogaServerInstance<object, GraphQLContext>;
