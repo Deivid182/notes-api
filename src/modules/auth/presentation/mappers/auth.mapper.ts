@@ -9,14 +9,10 @@ export interface MappedAuthPayload {
   user: MappedUser;
 }
 
-export function mapAuthPayload(result: {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-}): MappedAuthPayload {
-  return {
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-    user: mapUser(result.user),
-  };
+export function mapAuthPayload(
+  user: User,
+  accessToken: string,
+  refreshToken: string,
+): MappedAuthPayload {
+  return { accessToken, refreshToken, user: mapUser(user) };
 }

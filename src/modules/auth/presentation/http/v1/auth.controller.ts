@@ -19,14 +19,17 @@ export class AuthController {
     const { email, password } = req.body as RegisterBody;
     const result = await this.useCases.registerUser.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    sendData(res, mapAuthPayload(result), 201);
+    sendData(res, {
+      data: mapAuthPayload(result.user, result.accessToken, result.refreshToken),
+      status: 201,
+    });
   };
 
   login = async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginBody;
     const result = await this.useCases.login.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    sendData(res, mapAuthPayload(result));
+    sendData(res, { data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
   refresh = async (req: Request, res: Response) => {
@@ -36,7 +39,7 @@ export class AuthController {
 
     const result = await this.useCases.refreshToken.execute({ refreshToken });
     this.setRefreshCookie(res, result.refreshToken);
-    sendData(res, mapAuthPayload(result));
+    sendData(res, { data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
   logout = async (req: Request, res: Response) => {

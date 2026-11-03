@@ -14,14 +14,14 @@ export class NotesController {
   create = async (req: Request, res: Response) => {
     const { title, content } = req.body as CreateNoteBody;
     const note = await this.useCases.createNote.execute({ actor: actorOf(req), title, content });
-    sendData(res, mapNote(note), 201);
+    sendData(res, { data: mapNote(note), status: 201 });
   };
 
   list = async (req: Request, res: Response) => {
     const { limit, offset } = req.query as ListNotesQuery;
     const page = await this.useCases.listNotes.execute({ actor: actorOf(req), limit, offset });
     const { items, ...meta } = mapNotePage(page);
-    sendList(res, items, meta);
+    sendList(res, { data: items, meta });
   };
 
   get = async (req: Request, res: Response) => {
@@ -29,7 +29,7 @@ export class NotesController {
       actor: actorOf(req),
       noteId: req.params.id as string,
     });
-    sendData(res, mapNote(note));
+    sendData(res, { data: mapNote(note) });
   };
 
   update = async (req: Request, res: Response) => {
@@ -40,7 +40,7 @@ export class NotesController {
       title,
       content,
     });
-    sendData(res, mapNote(note));
+    sendData(res, { data: mapNote(note) });
   };
 
   delete = async (req: Request, res: Response) => {
