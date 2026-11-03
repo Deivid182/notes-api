@@ -1,17 +1,25 @@
 import { parseEnv } from '#modules/shared/infrastructure/config/env';
 
 import { createApp } from '../../src/app.js';
+import { createTestDatabase } from '../support/test-database.js';
 
 const silentLogger = { debug() {}, info() {}, warn() {}, error() {} };
 
-/** Misma composición que producción (`createApp`), sobre SQLite en memoria y sin abrir puertos. */
+/**
+ * Misma composición que producción (`createApp`), sin abrir puertos. Usa SQLite en memoria o,
+ * con `TEST_DB_ENGINE=postgres|mongodb`, una base aislada en los contenedores de `compose.test.yml`.
+ */
 export async function buildTestApp() {
-  const app = await createApp(parseEnv(process.env), { logger: silentLogger });
+  const db = await createTestDatabase();
+  const app = await createApp(parseEnv({ ...process.env, ...db.env }), { logger: silentLogger });
   return {
     app: app.http,
     yoga: app.graphql.yoga,
     container: app.container,
-    close: () => app.stop(),
+    close: async () => {
+      await app.stop();
+      await db.drop();
+    },
   };
 }
 

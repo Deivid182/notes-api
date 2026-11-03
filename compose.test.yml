@@ -1,0 +1,29 @@
+# Bases efímeras para probar cada motor (tmpfs, sin volúmenes, puertos no estándar).
+# Uso: `pnpm db:test:up` → `pnpm test:e2e:postgres` / `test:e2e:mongodb` → `pnpm db:test:down`
+# o todo junto: `pnpm test:db`.
+name: notes-api-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: notes
+      POSTGRES_PASSWORD: notes
+      POSTGRES_DB: notes
+    ports: ['55432:5432']
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U notes -d notes']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mongo:
+    image: mongo:7
+    ports: ['57017:27017']
+    tmpfs: [/data/db]
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
