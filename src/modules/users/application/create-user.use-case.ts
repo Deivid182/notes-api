@@ -29,7 +29,7 @@ export class CreateUserUseCase {
   async execute(input: CreateUserInput): Promise<User> {
     const email = Email.create(input.email);
     const password = Password.create(input.password);
-    const existing = await this.deps.userRepository.findByEmail(email.toString());
+    const existing = await this.deps.userRepository.findByEmail(email.value);
     if (existing) throw new ConflictError('Email already registered');
 
     const passwordHash = await this.deps.passwordHasher.hash(password.reveal());

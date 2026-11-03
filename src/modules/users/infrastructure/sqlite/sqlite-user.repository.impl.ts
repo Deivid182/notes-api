@@ -42,9 +42,9 @@ export class SqliteUserRepositoryImpl implements UserRepository {
       )
       .run(
         user.id,
-        user.email.toString(),
+        user.email.value,
         user.passwordHash,
-        user.role.toString(),
+        user.role.value,
         user.createdAt.toISOString(),
         user.updatedAt.toISOString(),
       );

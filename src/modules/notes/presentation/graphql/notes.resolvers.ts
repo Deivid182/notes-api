@@ -1,6 +1,6 @@
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
 
-import { toNoteDTO, toNotePageDTO } from '../dto/notes.dto.js';
+import { mapNote, mapNotePage } from '../mappers/note.mapper.js';
 
 import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
@@ -10,7 +10,7 @@ export const notesResolvers = {
     notes: async (_: unknown, args: { limit?: number; offset?: number }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       const page = await ctx.container.modules.notes.useCases.listNotes.execute({ actor, ...args });
-      return toNotePageDTO(page);
+      return mapNotePage(page);
     },
     note: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
@@ -18,7 +18,7 @@ export const notesResolvers = {
         actor,
         noteId: args.id,
       });
-      return toNoteDTO(note);
+      return mapNote(note);
     },
   },
   Mutation: {
@@ -32,7 +32,7 @@ export const notesResolvers = {
         actor,
         ...args,
       });
-      return toNoteDTO(note);
+      return mapNote(note);
     },
     updateNote: async (
       _: unknown,
@@ -46,7 +46,7 @@ export const notesResolvers = {
         title: args.title,
         content: args.content,
       });
-      return toNoteDTO(note);
+      return mapNote(note);
     },
     deleteNote: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);

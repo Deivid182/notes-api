@@ -1,8 +1,8 @@
 import { type GraphQLContext } from '#modules/shared/presentation/graphql/context';
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
-import { toUserDTO } from '#modules/users/presentation/dto/users.dto';
+import { mapUser } from '#modules/users/presentation/mappers/user.mapper';
 
-import { toAuthPayload } from '../dto/auth.dto.js';
+import { mapAuthPayload } from '../mappers/auth.mapper.js';
 
 // Los DomainError se traducen una sola vez en `maskError` (ver graphql/helpers.ts).
 export const authResolvers = {
@@ -13,7 +13,7 @@ export const authResolvers = {
         actor,
         userId: actor.id,
       });
-      return toUserDTO(user);
+      return mapUser(user);
     },
   },
   Mutation: {
@@ -23,15 +23,15 @@ export const authResolvers = {
       ctx: GraphQLContext,
     ) => {
       const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
-      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     login: async (_: unknown, args: { email: string; password: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.login.execute(args);
-      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     refreshToken: async (_: unknown, args: { refreshToken: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
-      return toAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
     },
     logout: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const user = requireUser(ctx);

@@ -24,8 +24,8 @@ describe('SqliteNoteRepositoryImpl rehydration', () => {
 
     const repo = new SqliteNoteRepositoryImpl(db);
     const note = await repo.findById('n1');
-    expect(note?.title.toString()).toHaveLength(200);
-    expect(note?.content.toString()).toHaveLength(20_000);
+    expect(note?.title.value).toHaveLength(200);
+    expect(note?.content.value).toHaveLength(20_000);
     db.close();
   });
 

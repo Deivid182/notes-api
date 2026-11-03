@@ -53,8 +53,8 @@ export class SqliteNoteRepositoryImpl implements NoteRepository {
       .run(
         note.id,
         note.ownerId,
-        note.title.toString(),
-        note.content.toString(),
+        note.title.value,
+        note.content.value,
         note.createdAt.toISOString(),
         note.updatedAt.toISOString(),
       );

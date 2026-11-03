@@ -61,7 +61,7 @@ describe('notes use cases', () => {
     const { create, repo } = setup();
     const note = await create.execute({ actor: alice, title: ' Hi ', content: 'x' });
     expect(note.ownerId).toBe('alice');
-    expect(note.title.toString()).toBe('Hi');
+    expect(note.title.value).toBe('Hi');
     expect(repo.items.size).toBe(1);
   });
 
@@ -120,7 +120,7 @@ describe('notes use cases', () => {
     ).rejects.toBeInstanceOf(ForbiddenError);
 
     const updated = await update.execute({ actor: alice, noteId: note.id, title: 'new' });
-    expect(updated.title.toString()).toBe('new');
+    expect(updated.title.value).toBe('new');
 
     await expect(del.execute({ actor: bob, noteId: note.id })).rejects.toBeInstanceOf(
       ForbiddenError,

@@ -34,9 +34,9 @@ export class MongoUserRepositoryImpl implements UserRepository {
   async save(user: User): Promise<void> {
     const doc: UserDoc = {
       _id: user.id,
-      email: user.email.toString(),
+      email: user.email.value,
       passwordHash: user.passwordHash,
-      role: user.role.toString(),
+      role: user.role.value,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

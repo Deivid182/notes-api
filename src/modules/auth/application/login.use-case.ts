@@ -24,13 +24,13 @@ export class LoginUseCase {
 
   async execute(input: LoginInput): Promise<LoginOutput> {
     const email = Email.create(input.email);
-    const user = await this.userRepository.findByEmail(email.toString());
+    const user = await this.userRepository.findByEmail(email.value);
     if (!user) throw new UnauthorizedError('Invalid credentials');
 
     const ok = await this.passwordHasher.compare(input.password, user.passwordHash);
     if (!ok) throw new UnauthorizedError('Invalid credentials');
 
-    const tokens = await this.tokenIssuer.issue(user.id, user.role.toString());
+    const tokens = await this.tokenIssuer.issue(user.id, user.role.value);
     return { user, ...tokens };
   }
 }

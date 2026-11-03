@@ -12,7 +12,7 @@ describe('Role', () => {
   });
 
   it('restore does not validate against the current role list', () => {
-    expect(Role.restore('legacy').toString()).toBe('legacy');
+    expect(Role.restore('legacy').value).toBe('legacy');
     expect(Role.restore('legacy').isAdmin()).toBe(false);
   });
 });

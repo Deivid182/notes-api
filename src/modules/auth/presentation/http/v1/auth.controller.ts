@@ -1,6 +1,6 @@
 import { UnauthorizedError } from '#modules/shared/domain/error';
 
-import { toAuthPayload } from '../../dto/auth.dto.js';
+import { mapAuthPayload } from '../../mappers/auth.mapper.js';
 
 import type { AuthModule } from '#modules/auth/auth.module';
 import type { LoginBody, LogoutBody, RefreshBody, RegisterBody } from './auth.schemas.js';
@@ -20,14 +20,14 @@ export class AuthController {
     this.setRefreshCookie(res, result.refreshToken);
     res
       .status(201)
-      .json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
+      .json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
   login = async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginBody;
     const result = await this.useCases.login.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    res.json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
   refresh = async (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ export class AuthController {
 
     const result = await this.useCases.refreshToken.execute({ refreshToken });
     this.setRefreshCookie(res, result.refreshToken);
-    res.json({ data: toAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    res.json({ data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
   };
 
   logout = async (req: Request, res: Response) => {

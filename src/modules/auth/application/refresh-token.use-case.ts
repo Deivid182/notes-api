@@ -51,7 +51,7 @@ export class RefreshTokenUseCase {
     const user = await this.userRepository.findById(payload.sub);
     if (!user) throw new UnauthorizedError('User not found');
 
-    const tokens = await this.tokenIssuer.issue(user.id, user.role.toString());
+    const tokens = await this.tokenIssuer.issue(user.id, user.role.value);
     return { user, ...tokens };
   }
 }

@@ -13,7 +13,7 @@ const BLOCKED_DOMAINS = new Set<string>([
  */
 
 export class Email {
-  private constructor(private readonly value: string) {}
+  private constructor(readonly value: string) {}
 
   static create(raw: string): Email {
     const normalized = raw.trim().toLowerCase();
@@ -32,9 +32,6 @@ export class Email {
     return new Email(stored);
   }
 
-  toString(): string {
-    return this.value;
-  }
   equals(other: Email): boolean {
     return this.value === other.value;
   }

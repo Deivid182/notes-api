@@ -22,7 +22,7 @@ export class RegisterUserUseCase {
   async execute(input: RegisterUserInput): Promise<RegisterUserOutput> {
     // El rol nunca se acepta desde la entrada pública: se aplica el default (spec §5.3).
     const user = await this.createUser.execute({ email: input.email, password: input.password });
-    const tokens = await this.tokenIssuer.issue(user.id, user.role.toString());
+    const tokens = await this.tokenIssuer.issue(user.id, user.role.value);
     return { user, ...tokens };
   }
 }

@@ -8,7 +8,7 @@ import { Note } from './note.entity.js';
 
 describe('NoteTitle', () => {
   it('trims the value', () => {
-    expect(NoteTitle.create('  hi  ').toString()).toBe('hi');
+    expect(NoteTitle.create('  hi  ').value).toBe('hi');
   });
 
   it.each(['', '   ', 'x'.repeat(151)])('rejects invalid title %#', (raw) => {
@@ -18,15 +18,15 @@ describe('NoteTitle', () => {
 
 describe('restore', () => {
   it('does not apply creation rules to stored values', () => {
-    expect(NoteTitle.restore('x'.repeat(200)).toString()).toHaveLength(200);
-    expect(NoteTitle.restore('').toString()).toBe('');
-    expect(NoteContent.restore('x'.repeat(20_000)).toString()).toHaveLength(20_000);
+    expect(NoteTitle.restore('x'.repeat(200)).value).toHaveLength(200);
+    expect(NoteTitle.restore('').value).toBe('');
+    expect(NoteContent.restore('x'.repeat(20_000)).value).toHaveLength(20_000);
   });
 });
 
 describe('NoteContent', () => {
   it('accepts empty and max-length content', () => {
-    expect(NoteContent.create('').toString()).toBe('');
+    expect(NoteContent.create('').value).toBe('');
     expect(() => NoteContent.create('x'.repeat(10_000))).not.toThrow();
   });
 
@@ -49,8 +49,8 @@ describe('Note.update', () => {
       updatedAt: at,
     });
     note.update({ title: NoteTitle.create('b') }, later);
-    expect(note.title.toString()).toBe('b');
-    expect(note.content.toString()).toBe('c');
+    expect(note.title.value).toBe('b');
+    expect(note.content.value).toBe('c');
     expect(note.updatedAt).toBe(later);
     expect(note.createdAt).toBe(at);
   });

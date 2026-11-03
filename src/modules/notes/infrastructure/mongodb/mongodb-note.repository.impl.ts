@@ -51,8 +51,8 @@ export class MongoNoteRepositoryImpl implements NoteRepository {
     const doc: NoteDoc = {
       _id: note.id,
       ownerId: note.ownerId,
-      title: note.title.toString(),
-      content: note.content.toString(),
+      title: note.title.value,
+      content: note.content.value,
       createdAt: note.createdAt,
       updatedAt: note.updatedAt,
     };

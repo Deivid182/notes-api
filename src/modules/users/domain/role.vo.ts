@@ -31,7 +31,4 @@ export class Role {
   equals(other: Role): boolean {
     return this.value === other.value;
   }
-  toString(): string {
-    return this.value;
-  }
 }

@@ -1,6 +1,6 @@
 import { requireAdmin, requireUser } from '#modules/shared/presentation/graphql/helpers';
 
-import { toUserDTO } from '../dto/users.dto.js';
+import { mapUser } from '../mappers/user.mapper.js';
 
 import type { GraphQLContext } from '#modules/shared/presentation/graphql/context';
 
@@ -13,7 +13,7 @@ export const usersResolvers = {
         actor,
         userId: args.id,
       });
-      return toUserDTO(user);
+      return mapUser(user);
     },
   },
   Mutation: {
@@ -24,7 +24,7 @@ export const usersResolvers = {
     ) => {
       requireAdmin(ctx);
       const user = await ctx.container.modules.users.useCases.createUser.execute(args);
-      return toUserDTO(user);
+      return mapUser(user);
     },
   },
 };

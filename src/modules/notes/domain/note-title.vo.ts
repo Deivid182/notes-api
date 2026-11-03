@@ -1,7 +1,7 @@
 import { ValidationError } from '#modules/shared/domain/error';
 
 export class NoteTitle {
-  private constructor(private readonly value: string) {}
+  private constructor(readonly value: string) {}
 
   static create(raw: string): NoteTitle {
     const trimmed = raw.trim();
@@ -16,9 +16,6 @@ export class NoteTitle {
     return new NoteTitle(stored);
   }
 
-  toString(): string {
-    return this.value;
-  }
   equals(other: NoteTitle): boolean {
     return this.value === other.value;
   }

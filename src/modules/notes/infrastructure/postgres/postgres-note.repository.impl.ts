@@ -48,14 +48,7 @@ export class PostgresNoteRepositoryImpl implements NoteRepository {
          title = EXCLUDED.title,
          content = EXCLUDED.content,
          updated_at = EXCLUDED.updated_at`,
-      [
-        note.id,
-        note.ownerId,
-        note.title.toString(),
-        note.content.toString(),
-        note.createdAt,
-        note.updatedAt,
-      ],
+      [note.id, note.ownerId, note.title.value, note.content.value, note.createdAt, note.updatedAt],
     );
   }
 

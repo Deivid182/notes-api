@@ -1,6 +1,6 @@
 import { actorOf } from '#modules/shared/presentation/http/v1/actor';
 
-import { toNoteDTO, toNotePageDTO } from '../../dto/notes.dto.js';
+import { mapNote, mapNotePage } from '../../mappers/note.mapper.js';
 
 import type { NotesModule } from '#modules/notes/notes.module';
 import type { CreateNoteBody, ListNotesQuery, UpdateNoteBody } from './schemas/notes.schemas.js';
@@ -13,13 +13,13 @@ export class NotesController {
   create = async (req: Request, res: Response) => {
     const { title, content } = req.body as CreateNoteBody;
     const note = await this.useCases.createNote.execute({ actor: actorOf(req), title, content });
-    res.status(201).json({ data: toNoteDTO(note) });
+    res.status(201).json({ data: mapNote(note) });
   };
 
   list = async (req: Request, res: Response) => {
     const { limit, offset } = req.query as ListNotesQuery;
     const page = await this.useCases.listNotes.execute({ actor: actorOf(req), limit, offset });
-    const { items, ...meta } = toNotePageDTO(page);
+    const { items, ...meta } = mapNotePage(page);
     res.status(200).json({ data: items, meta });
   };
 
@@ -28,7 +28,7 @@ export class NotesController {
       actor: actorOf(req),
       noteId: req.params.id as string,
     });
-    res.status(200).json({ data: toNoteDTO(note) });
+    res.status(200).json({ data: mapNote(note) });
   };
 
   update = async (req: Request, res: Response) => {
@@ -39,7 +39,7 @@ export class NotesController {
       title,
       content,
     });
-    res.status(200).json({ data: toNoteDTO(note) });
+    res.status(200).json({ data: mapNote(note) });
   };
 
   delete = async (req: Request, res: Response) => {

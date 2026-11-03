@@ -18,7 +18,7 @@ class InMemoryUserRepository implements UserRepository {
     return this.items.get(id) ?? null;
   }
   async findByEmail(email: string) {
-    return [...this.items.values()].find((u) => u.email.toString() === email) ?? null;
+    return [...this.items.values()].find((u) => u.email.value === email) ?? null;
   }
   async save(user: User) {
     this.items.set(user.id, user);
@@ -77,13 +77,13 @@ describe('AssignRoleUseCase', () => {
     await expect(
       assign.execute({ actor: alice, userId: 'alice', role: 'admin' }),
     ).rejects.toBeInstanceOf(ForbiddenError);
-    expect(repo.items.get('alice')?.role.toString()).toBe('user');
+    expect(repo.items.get('alice')?.role.value).toBe('user');
   });
 
   it('lets admin change a role', async () => {
     const { assign } = await setup();
     const user = await assign.execute({ actor: admin, userId: 'alice', role: 'admin' });
-    expect(user.role.toString()).toBe('admin');
+    expect(user.role.value).toBe('admin');
   });
 
   it('throws NotFound for a missing user', async () => {

@@ -38,9 +38,9 @@ export class PostgresUserRepository implements UserRepository {
          updated_at = EXCLUDED.updated_at`,
       [
         user.id,
-        user.email.toString(),
+        user.email.value,
         user.passwordHash,
-        user.role.toString(),
+        user.role.value,
         user.createdAt,
         user.updatedAt,
       ],
