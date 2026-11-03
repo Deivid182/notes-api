@@ -55,3 +55,12 @@ describe('Note.update', () => {
     expect(note.createdAt).toBe(at);
   });
 });
+
+describe('note value objects equality', () => {
+  it('compare by value', () => {
+    expect(NoteTitle.create(' a ').equals(NoteTitle.create('a'))).toBe(true);
+    expect(NoteTitle.create('a').equals(NoteTitle.create('b'))).toBe(false);
+    expect(NoteContent.create('x').equals(NoteContent.create('x'))).toBe(true);
+    expect(NoteContent.create('x').equals(NoteContent.create('y'))).toBe(false);
+  });
+});

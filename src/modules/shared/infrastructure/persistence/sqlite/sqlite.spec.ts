@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -75,6 +75,35 @@ describe('runSqliteMigrations', () => {
     ).run();
     db.prepare("DELETE FROM users WHERE id = 'u1'").run();
     expect(db.prepare('SELECT COUNT(*) AS n FROM notes').get()).toEqual({ n: 0 });
+    db.close();
+  });
+});
+
+describe('runSqliteMigrations rollback', () => {
+  it('rolls back a failing migration entirely and does not record it', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'sqlite-mig-'));
+    writeFileSync(join(tmp, '001-bad.sql'), 'CREATE TABLE half_done (id TEXT); THIS IS NOT SQL;');
+    const db = connectSqlite(':memory:');
+
+    await expect(runSqliteMigrations(db, logger, tmp)).rejects.toThrow();
+
+    expect(tables(db)).not.toContain('half_done');
+    expect(db.prepare('SELECT COUNT(*) AS n FROM _migrations').get()).toEqual({ n: 0 });
+    expect(logger.error).toHaveBeenCalledWith(
+      'sqlite migration failed: 001-bad.sql',
+      expect.objectContaining({ message: expect.any(String) }),
+    );
+    db.close();
+  });
+
+  it('applies later migrations on the next run once the bad one is fixed', async () => {
+    tmp = mkdtempSync(join(tmpdir(), 'sqlite-mig-'));
+    writeFileSync(join(tmp, '001-a.sql'), 'CREATE TABLE a (id TEXT);');
+    const db = connectSqlite(':memory:');
+    await runSqliteMigrations(db, logger, tmp);
+    writeFileSync(join(tmp, '002-b.sql'), 'CREATE TABLE b (id TEXT);');
+    await runSqliteMigrations(db, logger, tmp);
+    expect(tables(db)).toEqual(expect.arrayContaining(['a', 'b']));
     db.close();
   });
 });

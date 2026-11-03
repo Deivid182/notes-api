@@ -39,10 +39,14 @@ function postgresStore(pool: Pool): MigrationStore {
   };
 }
 
-export function runPostgresMigrations(pool: Pool, logger: Logger): Promise<void> {
+export function runPostgresMigrations(
+  pool: Pool,
+  logger: Logger,
+  dir = join(__dirname, 'migrations'),
+): Promise<void> {
   return runSqlMigrations({
     engine: 'postgres',
-    dir: join(__dirname, 'migrations'),
+    dir,
     store: postgresStore(pool),
     logger,
   });

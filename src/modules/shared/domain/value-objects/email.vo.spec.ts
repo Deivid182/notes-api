@@ -13,6 +13,15 @@ describe('Email', () => {
     expect(() => Email.create(raw)).toThrow(ValidationError);
   });
 
+  it('compares by value', () => {
+    expect(Email.create('A@x.com').equals(Email.create('a@x.com'))).toBe(true);
+    expect(Email.create('a@x.com').equals(Email.create('b@x.com'))).toBe(false);
+  });
+
+  it('rejects an address with an empty domain', () => {
+    expect(() => Email.create('a@')).toThrow(ValidationError);
+  });
+
   it('restore keeps the stored value untouched', () => {
     expect(Email.restore('Stored As-Is').value).toBe('Stored As-Is');
   });

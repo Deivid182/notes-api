@@ -40,10 +40,14 @@ function sqliteStore(db: DatabaseSync): MigrationStore {
   };
 }
 
-export function runSqliteMigrations(db: DatabaseSync, logger: Logger): Promise<void> {
+export function runSqliteMigrations(
+  db: DatabaseSync,
+  logger: Logger,
+  dir = join(__dirname, 'migrations'),
+): Promise<void> {
   return runSqlMigrations({
     engine: 'sqlite',
-    dir: join(__dirname, 'migrations'),
+    dir,
     store: sqliteStore(db),
     logger,
   });

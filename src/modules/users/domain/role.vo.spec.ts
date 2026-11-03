@@ -11,6 +11,11 @@ describe('Role', () => {
     expect(() => Role.create('root')).toThrow(ValidationError);
   });
 
+  it('compares by value', () => {
+    expect(Role.user().equals(Role.create('user'))).toBe(true);
+    expect(Role.user().equals(Role.admin())).toBe(false);
+  });
+
   it('restore does not validate against the current role list', () => {
     expect(Role.restore('legacy').value).toBe('legacy');
     expect(Role.restore('legacy').isAdmin()).toBe(false);
