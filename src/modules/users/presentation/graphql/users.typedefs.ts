@@ -1,4 +1,6 @@
-export const usersTypeDefs = `
+import { responseTypeDef } from '#modules/shared/presentation/graphql/response';
+
+export const usersTypeDefs = /* GraphQL */ `
   type User {
     id: ID!
     email: String!
@@ -7,11 +9,13 @@ export const usersTypeDefs = `
     updatedAt: String!
   }
 
+  ${responseTypeDef('UserResponse', 'User')}
+
   type Query {
-    getUser(id: ID!): User!
+    getUser(id: ID!): UserResponse!
   }
 
   type Mutation {
-    createUser(email: String!, password: String!, role: String): User!
+    createUser(email: String!, password: String!, role: String): UserResponse!
   }
 `;

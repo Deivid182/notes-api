@@ -1,4 +1,5 @@
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
+import { gqlResponse } from '#modules/shared/presentation/graphql/response';
 
 import { mapNote, mapNotePage } from '../mappers/note.mapper.js';
 
@@ -10,7 +11,7 @@ export const notesResolvers = {
     notes: async (_: unknown, args: { limit?: number; offset?: number }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
       const page = await ctx.container.modules.notes.useCases.listNotes.execute({ actor, ...args });
-      return mapNotePage(page);
+      return gqlResponse({ data: mapNotePage(page), message: 'Notes retrieved' });
     },
     note: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
@@ -18,7 +19,7 @@ export const notesResolvers = {
         actor,
         noteId: args.id,
       });
-      return mapNote(note);
+      return gqlResponse({ data: mapNote(note), message: 'Note retrieved' });
     },
   },
   Mutation: {
@@ -32,7 +33,7 @@ export const notesResolvers = {
         actor,
         ...args,
       });
-      return mapNote(note);
+      return gqlResponse({ data: mapNote(note), message: 'Note created', statusCode: 201 });
     },
     updateNote: async (
       _: unknown,
@@ -46,7 +47,7 @@ export const notesResolvers = {
         title: args.title,
         content: args.content,
       });
-      return mapNote(note);
+      return gqlResponse({ data: mapNote(note), message: 'Note updated' });
     },
     deleteNote: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
       const actor = requireUser(ctx);
@@ -54,7 +55,7 @@ export const notesResolvers = {
         actor,
         noteId: args.id,
       });
-      return true;
+      return gqlResponse({ data: null, message: 'Note deleted' });
     },
   },
 };

@@ -1,5 +1,5 @@
 import { UnauthorizedError } from '#modules/shared/domain/error';
-import { sendData, sendNoContent } from '#modules/shared/presentation/http/v1/response';
+import { sendData } from '#modules/shared/presentation/http/v1/response';
 
 import { mapAuthPayload } from '../../mappers/auth.mapper.js';
 
@@ -21,6 +21,7 @@ export class AuthController {
     this.setRefreshCookie(res, result.refreshToken);
     sendData(res, {
       data: mapAuthPayload(result.user, result.accessToken, result.refreshToken),
+      message: 'User registered',
       status: 201,
     });
   };
@@ -29,7 +30,10 @@ export class AuthController {
     const { email, password } = req.body as LoginBody;
     const result = await this.useCases.login.execute({ email, password });
     this.setRefreshCookie(res, result.refreshToken);
-    sendData(res, { data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    sendData(res, {
+      data: mapAuthPayload(result.user, result.accessToken, result.refreshToken),
+      message: 'Login successful',
+    });
   };
 
   refresh = async (req: Request, res: Response) => {
@@ -39,7 +43,10 @@ export class AuthController {
 
     const result = await this.useCases.refreshToken.execute({ refreshToken });
     this.setRefreshCookie(res, result.refreshToken);
-    sendData(res, { data: mapAuthPayload(result.user, result.accessToken, result.refreshToken) });
+    sendData(res, {
+      data: mapAuthPayload(result.user, result.accessToken, result.refreshToken),
+      message: 'Token refreshed',
+    });
   };
 
   logout = async (req: Request, res: Response) => {
@@ -51,7 +58,7 @@ export class AuthController {
       all: body.all,
     });
     res.clearCookie(REFRESH_COOKIE, { path: '/' });
-    sendNoContent(res);
+    sendData(res, { data: null, message: 'Logged out' });
   };
 
   private setRefreshCookie(res: Response, token: string) {

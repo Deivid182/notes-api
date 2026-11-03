@@ -30,6 +30,6 @@ export async function gql(
   });
   return (await res.json()) as {
     data: Record<string, Record<string, unknown>>;
-    errors?: Array<{ extensions: { code: string } }>;
+    errors?: Array<{ message: string; extensions: Record<string, unknown> & { code: string } }>;
   };
 }

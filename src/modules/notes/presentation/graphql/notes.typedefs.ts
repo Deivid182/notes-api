@@ -1,3 +1,5 @@
+import { responseTypeDef } from '#modules/shared/presentation/graphql/response';
+
 export const notesTypeDefs = /* GraphQL */ `
   type Note {
     id: ID!
@@ -15,14 +17,17 @@ export const notesTypeDefs = /* GraphQL */ `
     hasMore: Boolean!
   }
 
+  ${responseTypeDef('NoteResponse', 'Note')}
+  ${responseTypeDef('NotePageResponse', 'NotePage')}
+
   type Query {
-    notes(limit: Int, offset: Int): NotePage!
-    note(id: ID!): Note!
+    notes(limit: Int, offset: Int): NotePageResponse!
+    note(id: ID!): NoteResponse!
   }
 
   type Mutation {
-    createNote(title: String!, content: String): Note!
-    updateNote(id: ID!, title: String, content: String): Note!
-    deleteNote(id: ID!): Boolean!
+    createNote(title: String!, content: String): NoteResponse!
+    updateNote(id: ID!, title: String, content: String): NoteResponse!
+    deleteNote(id: ID!): EmptyResponse!
   }
 `;

@@ -41,6 +41,29 @@ describe('notes HTTP e2e', () => {
     expect((await request(t.app).get('/api/v1/notes')).status).toBe(401);
   });
 
+  it('wraps success and error responses in the standard envelope', async () => {
+    const ok = await request(t.app).post('/api/v1/notes').set(auth(alice)).send({ title: 'Env' });
+    expect(ok.body).toMatchObject({
+      success: true,
+      statusCode: 201,
+      message: 'Note created',
+      path: '/api/v1/notes',
+      data: { title: 'Env' },
+    });
+    expect(new Date(ok.body.timestamp as string).toString()).not.toBe('Invalid Date');
+
+    const err = await request(t.app).get('/api/v1/notes/missing').set(auth(alice));
+    expect(err.status).toBe(404);
+    expect(err.body).toMatchObject({
+      success: false,
+      statusCode: 404,
+      path: '/api/v1/notes/missing',
+      error: { code: 'NOT_FOUND' },
+    });
+    expect(err.body).not.toHaveProperty('data');
+    expect(typeof err.body.message).toBe('string');
+  });
+
   it('runs the full CRUD flow for the owner', async () => {
     const created = await request(t.app)
       .post('/api/v1/notes')
@@ -61,7 +84,7 @@ describe('notes HTTP e2e', () => {
     expect(patched.body.data.content).toBe('new body');
     expect(patched.body.data.title).toBe('First');
 
-    expect((await request(t.app).delete(`/api/v1/notes/${id}`).set(auth(alice))).status).toBe(204);
+    expect((await request(t.app).delete(`/api/v1/notes/${id}`).set(auth(alice))).status).toBe(200);
     expect((await request(t.app).get(`/api/v1/notes/${id}`).set(auth(alice))).status).toBe(404);
   });
 

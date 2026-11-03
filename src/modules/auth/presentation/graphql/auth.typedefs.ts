@@ -1,3 +1,5 @@
+import { responseTypeDef } from '#modules/shared/presentation/graphql/response';
+
 export const authTypeDefs = /* GraphQL */ `
   type AuthPayload {
     accessToken: String!
@@ -5,14 +7,16 @@ export const authTypeDefs = /* GraphQL */ `
     user: User!
   }
 
+  ${responseTypeDef('AuthPayloadResponse', 'AuthPayload')}
+
   type Query {
-    me: User!
+    me: UserResponse!
   }
 
   type Mutation {
-    register(email: String!, password: String!): AuthPayload!
-    login(email: String!, password: String!): AuthPayload!
-    refreshToken(refreshToken: String!): AuthPayload!
-    logout: Boolean!
+    register(email: String!, password: String!): AuthPayloadResponse!
+    login(email: String!, password: String!): AuthPayloadResponse!
+    refreshToken(refreshToken: String!): AuthPayloadResponse!
+    logout: EmptyResponse!
   }
 `;

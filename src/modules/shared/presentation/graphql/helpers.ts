@@ -2,6 +2,8 @@ import { GraphQLError } from 'graphql';
 
 import { DomainError } from '#modules/shared/domain/error';
 
+import { errorExtensions } from './response.js';
+
 import type { Logger } from '#modules/shared/domain/interfaces/logger.interface';
 import type { AuthUser, GraphQLContext } from './context.js';
 import type { MaskError } from 'graphql-yoga';
@@ -9,7 +11,7 @@ import type { MaskError } from 'graphql-yoga';
 export function requireUser(ctx: GraphQLContext): AuthUser {
   if (!ctx.user) {
     throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHORIZED' },
+      extensions: errorExtensions('UNAUTHORIZED'),
     });
   }
   return ctx.user;
@@ -18,7 +20,9 @@ export function requireUser(ctx: GraphQLContext): AuthUser {
 export function requireAdmin(ctx: GraphQLContext): AuthUser {
   const user = requireUser(ctx);
   if (user.role !== 'admin') {
-    throw new GraphQLError('Admin role required', { extensions: { code: 'FORBIDDEN' } });
+    throw new GraphQLError('Admin role required', {
+      extensions: errorExtensions('FORBIDDEN'),
+    });
   }
   return user;
 }
@@ -37,12 +41,20 @@ export function createMaskError(logger: Logger): MaskError {
       return new GraphQLError(original.message, {
         ...position,
         originalError: original,
-        extensions: { code: original.code },
+        extensions: errorExtensions(original.code),
       });
     }
 
-    // Ya es un GraphQLError con su código (p. ej. `requireUser`): se entrega tal cual.
-    if (original instanceof GraphQLError) return located ?? original;
+    // GraphQLError con código propio (p. ej. `requireUser`): se completa con el envoltorio estándar.
+    if (original instanceof GraphQLError) {
+      const code = original.extensions.code;
+      if (typeof code !== 'string') return located ?? original;
+      return new GraphQLError(original.message, {
+        ...position,
+        originalError: original,
+        extensions: { ...errorExtensions(code), ...original.extensions },
+      });
+    }
 
     logger.error('Unhandled GraphQL error', {
       message: original instanceof Error ? original.message : String(original),
@@ -50,7 +62,7 @@ export function createMaskError(logger: Logger): MaskError {
     });
     return new GraphQLError('Internal server error', {
       ...position,
-      extensions: { code: 'INTERNAL_ERROR' },
+      extensions: errorExtensions('INTERNAL_ERROR'),
     });
   };
 }

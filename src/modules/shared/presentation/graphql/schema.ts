@@ -9,7 +9,10 @@ import { notesTypeDefs } from '#modules/notes/presentation/graphql/notes.typedef
 import { usersResolvers } from '#modules/users/presentation/graphql/users.resolvers';
 import { usersTypeDefs } from '#modules/users/presentation/graphql/users.typedefs';
 
+import { sharedTypeDefs } from './typedefs.js';
+
 export const typeDefs = /* GraphQL */ `
+  ${sharedTypeDefs}
   ${usersTypeDefs}
   ${authTypeDefs}
   ${notesTypeDefs}

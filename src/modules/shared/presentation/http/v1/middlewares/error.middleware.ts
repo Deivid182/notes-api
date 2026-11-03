@@ -3,23 +3,16 @@ import { ZodError } from 'zod';
 import { DomainError } from '#modules/shared/domain/error';
 import { type Logger } from '#modules/shared/domain/interfaces/logger.interface';
 
+import { statusOf } from '../../../status.js';
 import { sendError } from '../response.js';
 
 import type { ErrorRequestHandler } from 'express';
-
-const STATUS_MAP: Record<string, number> = {
-  VALIDATION_ERROR: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-};
 
 export function createErrorHandler(logger: Logger): ErrorRequestHandler {
   return (err, req, res, _next) => {
     // Errores de dominio → mapa directo
     if (err instanceof DomainError) {
-      const status = STATUS_MAP[err.code] ?? 500;
+      const status = statusOf(err.code);
       logger.warn('Domain error', {
         code: err.code,
         message: err.message,

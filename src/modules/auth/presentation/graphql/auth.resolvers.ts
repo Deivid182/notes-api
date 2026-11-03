@@ -1,5 +1,6 @@
 import { type GraphQLContext } from '#modules/shared/presentation/graphql/context';
 import { requireUser } from '#modules/shared/presentation/graphql/helpers';
+import { gqlResponse } from '#modules/shared/presentation/graphql/response';
 import { mapUser } from '#modules/users/presentation/mappers/user.mapper';
 
 import { mapAuthPayload } from '../mappers/auth.mapper.js';
@@ -13,7 +14,7 @@ export const authResolvers = {
         actor,
         userId: actor.id,
       });
-      return mapUser(user);
+      return gqlResponse({ data: mapUser(user), message: 'User retrieved' });
     },
   },
   Mutation: {
@@ -23,20 +24,30 @@ export const authResolvers = {
       ctx: GraphQLContext,
     ) => {
       const r = await ctx.container.modules.auth.useCases.registerUser.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return gqlResponse({
+        data: mapAuthPayload(r.user, r.accessToken, r.refreshToken),
+        message: 'User registered',
+        statusCode: 201,
+      });
     },
     login: async (_: unknown, args: { email: string; password: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.login.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return gqlResponse({
+        data: mapAuthPayload(r.user, r.accessToken, r.refreshToken),
+        message: 'Login successful',
+      });
     },
     refreshToken: async (_: unknown, args: { refreshToken: string }, ctx: GraphQLContext) => {
       const r = await ctx.container.modules.auth.useCases.refreshToken.execute(args);
-      return mapAuthPayload(r.user, r.accessToken, r.refreshToken);
+      return gqlResponse({
+        data: mapAuthPayload(r.user, r.accessToken, r.refreshToken),
+        message: 'Token refreshed',
+      });
     },
     logout: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const user = requireUser(ctx);
       await ctx.container.modules.auth.useCases.logout.execute({ userId: user.id, all: true });
-      return true;
+      return gqlResponse({ data: null, message: 'Logged out' });
     },
   },
 };

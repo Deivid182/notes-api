@@ -13,7 +13,7 @@ export class UsersController {
   createUser = async (req: Request, res: Response) => {
     const { email, password, role } = req.body as CreateUserBody;
     const user = await this.useCases.createUser.execute({ email, password, role });
-    sendData(res, { data: mapUser(user), status: 201 });
+    sendData(res, { data: mapUser(user), message: 'User created', status: 201 });
   };
 
   getUser = async (req: Request, res: Response) => {
@@ -21,7 +21,7 @@ export class UsersController {
       actor: actorOf(req),
       userId: req.params.id as string,
     });
-    sendData(res, { data: mapUser(user) });
+    sendData(res, { data: mapUser(user), message: 'User retrieved' });
   };
 
   assignRole = async (req: Request, res: Response) => {
@@ -31,6 +31,6 @@ export class UsersController {
       userId: req.params.id as string,
       role,
     });
-    sendData(res, { data: mapUser(user) });
+    sendData(res, { data: mapUser(user), message: 'Role assigned' });
   };
 }

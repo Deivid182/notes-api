@@ -1,38 +1,37 @@
 import type { Response } from 'express';
 
-/** Contrato único de respuestas HTTP: `{ data }`, `{ data, meta }`, `{ error }` o 204 sin cuerpo. */
-export interface ApiData<T> {
+/**
+ * Contrato único de respuestas HTTP.
+ * Éxito: `{ success, statusCode, message, data, meta?, path, timestamp }`.
+ * Error: `{ success, statusCode, message, error: { code, details? }, path, timestamp }` (sin `data`).
+ */
+interface Envelope {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  path: string;
+  timestamp: string;
+}
+export interface SuccessBody<T, M = undefined> extends Envelope {
+  success: true;
   data: T;
+  meta?: M;
 }
-export interface ApiList<T, M> {
-  data: T[];
-  meta: M;
-}
-export interface ApiErrorBody {
-  error: { code: string; message: string; details?: unknown };
+export interface ErrorBody extends Envelope {
+  success: false;
+  error: { code: string; details?: unknown };
 }
 
 export interface DataResponse<T> {
   data: T;
+  message: string;
   status?: number;
 }
 export interface ListResponse<T, M> {
   data: T[];
   meta: M;
+  message: string;
 }
-
-export function sendData<T>(res: Response, { data, status = 200 }: DataResponse<T>): void {
-  res.status(status).json({ data } satisfies ApiData<T>);
-}
-
-export function sendList<T, M>(res: Response, { data, meta }: ListResponse<T, M>): void {
-  res.status(200).json({ data, meta } satisfies ApiList<T, M>);
-}
-
-export function sendNoContent(res: Response): void {
-  res.status(204).send();
-}
-
 export interface ErrorResponse {
   status: number;
   code: string;
@@ -40,8 +39,26 @@ export interface ErrorResponse {
   details?: unknown;
 }
 
+const envelope = (res: Response, statusCode: number, message: string) => ({
+  statusCode,
+  message,
+  path: res.req.originalUrl,
+  timestamp: new Date().toISOString(),
+});
+
+export function sendData<T>(res: Response, { data, message, status = 200 }: DataResponse<T>): void {
+  const body: SuccessBody<T> = { success: true, ...envelope(res, status, message), data };
+  res.status(status).json(body);
+}
+
+export function sendList<T, M>(res: Response, { data, meta, message }: ListResponse<T, M>): void {
+  const body: SuccessBody<T[], M> = { success: true, ...envelope(res, 200, message), data, meta };
+  res.status(200).json(body);
+}
+
 export function sendError(res: Response, { status, code, message, details }: ErrorResponse): void {
-  const error: ApiErrorBody['error'] = { code, message };
+  const error: ErrorBody['error'] = { code };
   if (details !== undefined) error.details = details;
-  res.status(status).json({ error } satisfies ApiErrorBody);
+  const body: ErrorBody = { success: false, ...envelope(res, status, message), error };
+  res.status(status).json(body);
 }

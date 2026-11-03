@@ -1,4 +1,5 @@
 import { requireAdmin, requireUser } from '#modules/shared/presentation/graphql/helpers';
+import { gqlResponse } from '#modules/shared/presentation/graphql/response';
 
 import { mapUser } from '../mappers/user.mapper.js';
 
@@ -13,7 +14,7 @@ export const usersResolvers = {
         actor,
         userId: args.id,
       });
-      return mapUser(user);
+      return gqlResponse({ data: mapUser(user), message: 'User retrieved' });
     },
   },
   Mutation: {
@@ -24,7 +25,7 @@ export const usersResolvers = {
     ) => {
       requireAdmin(ctx);
       const user = await ctx.container.modules.users.useCases.createUser.execute(args);
-      return mapUser(user);
+      return gqlResponse({ data: mapUser(user), message: 'User created', statusCode: 201 });
     },
   },
 };
